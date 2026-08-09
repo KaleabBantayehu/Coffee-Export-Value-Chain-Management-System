@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# FastAPI / Python
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+dist/
+build/
+
+# Environment
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Database
+*.sqlite
+*.sqlite3
+
+# Temporary files
+*.tmp
+*.temp
+
+# Testing
+.pytest_cache/
+
+# Claude / Gemini / AI temporary files
+*.bak
