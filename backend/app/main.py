@@ -1,9 +1,28 @@
-from fastapi import FastAPI
-from starlette.responses import JSONResponse
+from fastapi import FastAPI, Request, status
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from jose import JWTError
+
+from app.api.v1.auth import router as auth_router
 
 
 def create_app() -> FastAPI:
     app = FastAPI(title="CEVCMS Backend")
+    app.include_router(auth_router, prefix="/api/v1")
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_exception_handler(_: Request, exc: RequestValidationError) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"detail": "Malformed request body."},
+        )
+
+    @app.exception_handler(JWTError)
+    async def jwt_error_handler(_: Request, exc: JWTError) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"detail": "Invalid authentication token."},
+        )
 
     @app.get("/api/v1/health", response_class=JSONResponse)
     async def health_check():

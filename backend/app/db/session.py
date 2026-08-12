@@ -19,6 +19,15 @@ def init_engine():
     return _engine
 
 
+def get_db():
+    init_engine()
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
 def get_session():
     init_engine()
     return SessionLocal()
