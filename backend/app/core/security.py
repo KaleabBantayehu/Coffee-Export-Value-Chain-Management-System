@@ -1,6 +1,6 @@
 import bcrypt
 from datetime import datetime, timedelta, timezone
-from jose import jwt
+from jose import JWTError, jwt
 
 
 def hash_password(plain_password: str) -> str:
@@ -24,3 +24,7 @@ def create_jwt_token(subject: str, role: str, secret_key: str, expires_delta_min
     }
     token = jwt.encode(payload, secret_key, algorithm="HS256")
     return token, expires_at
+
+
+def decode_jwt_token(token: str, secret_key: str) -> dict:
+    return jwt.decode(token, secret_key, algorithms=["HS256"])

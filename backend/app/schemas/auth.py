@@ -15,5 +15,16 @@ class LoginResponse(BaseModel):
     expires_at: datetime
 
 
+class UserProfileResponse(BaseModel):
+    user_id: int
+    username: str
+    full_name: str
+    role: str
+
+
+class LogoutResponse(BaseModel):
+    detail: str
+
+
 class ErrorResponse(BaseModel):
     detail: str

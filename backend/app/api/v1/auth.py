@@ -1,15 +1,15 @@
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from jose import JWTError
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
-from app.core.security import create_jwt_token, verify_password
+from app.core.security import create_jwt_token, decode_jwt_token, verify_password
 from app.db.models import User
 from app.db.session import get_db
-from app.schemas.auth import ErrorResponse, LoginRequest, LoginResponse
+from app.schemas.auth import ErrorResponse, LoginRequest, LoginResponse, LogoutResponse, UserProfileResponse
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -61,6 +61,49 @@ def _create_access_token(user_id: int, role: str) -> tuple[str, datetime]:
     return token, expires_at
 
 
+def get_current_user(
+    authorization: str | None = Header(default=None),
+    session: Session = Depends(get_db),
+) -> User:
+    if not authorization:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication token.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    scheme, _, token = authorization.partition(" ")
+    if scheme.lower() != "bearer" or not token.strip():
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication token.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    try:
+        payload = decode_jwt_token(token.strip(), get_settings().JWT_SECRET_KEY)
+        subject = payload.get("sub")
+        role = payload.get("role")
+        if not subject or not str(subject).isdigit() or not isinstance(role, str) or not role:
+            raise JWTError("Invalid subject")
+        user_id = int(subject)
+    except (JWTError, TypeError, ValueError):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication token.",
+            headers={"WWW-Authenticate": "Bearer"},
+        ) from None
+
+    user = session.query(User).filter(User.user_id == user_id).one_or_none()
+    if not user or not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication token.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return user
+
+
 @router.post(
     "/login",
     response_model=LoginResponse,
@@ -86,3 +129,26 @@ async def login(request: Request, body: LoginRequest, session: Session = Depends
         role=user.role.role_name,
         expires_at=expires_at,
     )
+
+
+@router.get(
+    "/me",
+    response_model=UserProfileResponse,
+    responses={401: {"model": ErrorResponse}},
+)
+async def get_authenticated_profile(user: User = Depends(get_current_user)) -> UserProfileResponse:
+    return UserProfileResponse(
+        user_id=user.user_id,
+        username=user.username,
+        full_name=user.full_name,
+        role=user.role.role_name,
+    )
+
+
+@router.post(
+    "/logout",
+    response_model=LogoutResponse,
+    responses={401: {"model": ErrorResponse}},
+)
+async def logout(_: User = Depends(get_current_user)) -> LogoutResponse:
+    return LogoutResponse(detail="Logout acknowledged.")
