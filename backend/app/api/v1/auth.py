@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
 from app.core.security import create_jwt_token, decode_jwt_token, verify_password
-from app.db.models import User
+from app.db.models import Permission, Role, User
 from app.db.session import get_db
 from app.schemas.auth import ErrorResponse, LoginRequest, LoginResponse, LogoutResponse, UserProfileResponse
 
@@ -102,6 +102,37 @@ def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
     return user
+
+
+def require_permissions(*required_permissions: str):
+    """Return a dependency that requires every named seeded permission."""
+    required_permission_set = frozenset(required_permissions)
+
+    def authorize(user: User = Depends(get_current_user), session: Session = Depends(get_db)) -> User:
+        try:
+            granted_permissions = {
+                permission_code
+                for (permission_code,) in (
+                    session.query(Permission.permission_code)
+                    .join(Permission.roles)
+                    .filter(Role.role_id == user.role_id)
+                    .all()
+                )
+            }
+        except Exception:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not authorized.",
+            ) from None
+
+        if not required_permission_set.issubset(granted_permissions):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not authorized.",
+            )
+        return user
+
+    return authorize
 
 
 @router.post(
