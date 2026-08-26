@@ -16,6 +16,8 @@ from app.db.models import Base, Permission, Role, User
 from app.db.session import SessionLocal, init_engine, reset_engine
 from app.main import app
 
+AUTH_TABLES = [Base.metadata.tables[name] for name in ("roles", "permissions", "role_permission", "users")]
+
 
 class LiveServer:
     def __init__(self, application):
@@ -51,13 +53,14 @@ class LiveServer:
 
 class RbacTests(unittest.TestCase):
     def setUp(self):
+        self.env_backup = dict(os.environ)
         self.tmp_db = tempfile.NamedTemporaryFile(suffix=".sqlite", delete=False)
         self.tmp_db.close()
         os.environ["DATABASE_URL"] = f"sqlite:///{self.tmp_db.name}"
         os.environ["JWT_SECRET_KEY"] = "testsecretkey123"
         reset_engine()
         reset_rate_limit()
-        Base.metadata.create_all(init_engine())
+        Base.metadata.create_all(init_engine(), tables=AUTH_TABLES)
 
         with SessionLocal() as session:
             admin_role = Role(role_name="Admin")
@@ -79,6 +82,8 @@ class RbacTests(unittest.TestCase):
         self.server.stop()
         reset_engine()
         os.unlink(self.tmp_db.name)
+        os.environ.clear()
+        os.environ.update(self.env_backup)
 
     def request(self, token=None):
         headers = {"Authorization": f"Bearer {token}"} if token else {}

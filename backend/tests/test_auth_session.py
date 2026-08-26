@@ -18,6 +18,9 @@ from app.db.session import SessionLocal, init_engine, reset_engine
 from app.main import app
 
 
+AUTH_TABLES = [Base.metadata.tables[name] for name in ("roles", "permissions", "role_permission", "users")]
+
+
 class LiveServer:
     def __init__(self, application):
         self._port = self._find_free_port()
@@ -56,6 +59,7 @@ class AuthSessionTests(unittest.TestCase):
     password = "TempP@ss1234"
 
     def setUp(self):
+        self.env_backup = dict(os.environ)
         self.tmp_db = tempfile.NamedTemporaryFile(suffix=".sqlite", delete=False)
         self.tmp_db.close()
         os.environ["DATABASE_URL"] = f"sqlite:///{self.tmp_db.name}"
@@ -63,7 +67,7 @@ class AuthSessionTests(unittest.TestCase):
         reset_engine()
         reset_rate_limit()
         engine = init_engine()
-        Base.metadata.create_all(engine)
+        Base.metadata.create_all(engine, tables=AUTH_TABLES)
 
         with SessionLocal() as session:
             admin_role = Role(role_name="Admin", description="Admin role.")
@@ -87,6 +91,8 @@ class AuthSessionTests(unittest.TestCase):
         self.server.stop()
         reset_engine()
         os.unlink(self.tmp_db.name)
+        os.environ.clear()
+        os.environ.update(self.env_backup)
 
     def request(self, method, path, token=None):
         request = urllib.request.Request(

@@ -20,6 +20,9 @@ from app.db.models import Base, Role, User
 from app.db.session import reset_engine, init_engine, SessionLocal
 
 
+AUTH_TABLES = [Base.metadata.tables[name] for name in ("roles", "permissions", "role_permission", "users")]
+
+
 class LiveServer:
     def __init__(self, app):
         self.app = app
@@ -54,6 +57,7 @@ class LiveServer:
 
 class AuthLoginTests(unittest.TestCase):
     def setUp(self):
+        self.env_backup = dict(os.environ)
         self.tmp_db = tempfile.NamedTemporaryFile(suffix=".sqlite", delete=False)
         self.tmp_db.close()
         db_url = f"sqlite:///{self.tmp_db.name}"
@@ -64,7 +68,7 @@ class AuthLoginTests(unittest.TestCase):
         reset_engine()
         reset_rate_limit()
         engine = init_engine()
-        Base.metadata.create_all(engine)
+        Base.metadata.create_all(engine, tables=AUTH_TABLES)
 
         with SessionLocal() as session:
             admin_role = Role(role_name="Admin", description="Admin role.")
@@ -88,6 +92,8 @@ class AuthLoginTests(unittest.TestCase):
         self.server.stop()
         reset_engine()
         os.unlink(self.tmp_db.name)
+        os.environ.clear()
+        os.environ.update(self.env_backup)
 
     def _post_json(self, path, payload):
         url = urllib.parse.urljoin(self.server.base_url, path)
