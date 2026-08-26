@@ -5,6 +5,13 @@ from app.core.config import get_settings
 
 
 class ConfigTests(unittest.TestCase):
+    def setUp(self):
+        self.env_backup = dict(os.environ)
+
+    def tearDown(self):
+        os.environ.clear()
+        os.environ.update(self.env_backup)
+
     def test_settings_load_from_env(self):
         os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
         os.environ.setdefault("JWT_SECRET_KEY", "testsecretkey123")

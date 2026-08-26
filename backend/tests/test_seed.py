@@ -12,9 +12,12 @@ from app.db.models import Base, Permission, Role, User
 from app.db.seed import ROLE_NAMES, PERMISSIONS, ROLE_PERMISSIONS, seed_auth_data
 from app.db.session import reset_engine, SessionLocal
 
+AUTH_TABLES = [Base.metadata.tables[name] for name in ("roles", "permissions", "role_permission", "users")]
+
 
 class SeedTests(unittest.TestCase):
     def setUp(self):
+        self.env_backup = dict(os.environ)
         self.tmp_db = tempfile.NamedTemporaryFile(suffix='.sqlite', delete=False)
         self.tmp_db.close()
         self.db_url = f'sqlite:///{self.tmp_db.name}'
@@ -23,13 +26,15 @@ class SeedTests(unittest.TestCase):
         os.environ['JWT_SECRET_KEY'] = 'testsecretkey123'
         self.engine = create_engine(self.db_url, future=True)
         self.SessionLocal = sessionmaker(bind=self.engine, autoflush=False, autocommit=False, future=True)
-        Base.metadata.create_all(self.engine)
+        Base.metadata.create_all(self.engine, tables=AUTH_TABLES)
 
     def tearDown(self):
         self.engine.dispose()
         reset_engine()
         gc.collect()
         os.unlink(self.tmp_db.name)
+        os.environ.clear()
+        os.environ.update(self.env_backup)
 
     def test_seed_authorization_data(self):
         reset_engine()
