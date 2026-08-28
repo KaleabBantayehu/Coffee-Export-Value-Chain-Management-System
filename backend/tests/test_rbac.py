@@ -101,7 +101,10 @@ class RbacTests(unittest.TestCase):
         status, payload = self.request(self.token_for_user(1, "Admin"))
 
         self.assertEqual(status, 200)
-        self.assertEqual([user["username"] for user in payload], ["admin", "agent"])
+        # AUTH-005 finalizes this route as a paginated envelope; AUTH-004's
+        # authorization assertions below are unchanged.
+        self.assertEqual([user["username"] for user in payload["items"]], ["admin", "agent"])
+        self.assertEqual(payload["total"], 2)
 
     def test_authenticated_user_without_seeded_permission_is_forbidden(self):
         status, payload = self.request(self.token_for_user(2, "Field/Registry Agent"))
