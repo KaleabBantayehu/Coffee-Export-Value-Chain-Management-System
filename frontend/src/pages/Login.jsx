@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '../context/useAuth'
+import { navigate } from '../routes/navigate'
 
 function Login() {
   const { signIn } = useAuth()
@@ -14,6 +15,7 @@ function Login() {
     try {
       await signIn({ username, password })
       setPassword('')
+      navigate('/dashboard')
     } catch (requestError) {
       setError(requestError.message)
     } finally {

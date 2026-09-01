@@ -1,20 +1,31 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
-import { login } from '../api/auth'
+import { login, logout } from '../api/auth'
 import { AuthContext } from './authContext'
 
 export function AuthProvider({ children }) {
   const [accessToken, setAccessToken] = useState(null)
   const [role, setRole] = useState(null)
 
-  const signIn = async (credentials) => {
+  const signIn = useCallback(async (credentials) => {
     const response = await login(credentials)
 
     setAccessToken(response.access_token)
     setRole(response.role)
 
     return response
-  }
+  }, [])
+
+  const signOut = useCallback(async () => {
+    try {
+      if (accessToken) {
+        await logout(accessToken)
+      }
+    } finally {
+      setAccessToken(null)
+      setRole(null)
+    }
+  }, [accessToken])
 
   const value = useMemo(
     () => ({
@@ -22,8 +33,9 @@ export function AuthProvider({ children }) {
       role,
       isAuthenticated: Boolean(accessToken),
       signIn,
+      signOut,
     }),
-    [accessToken, role],
+    [accessToken, role, signIn, signOut],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

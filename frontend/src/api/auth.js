@@ -6,3 +6,10 @@ export async function login(credentials) {
   if (!response.ok) throw new Error(payload.detail ?? 'Unable to sign in. Please try again.')
   return payload
 }
+
+export async function logout(accessToken) {
+  await fetch(`${API_BASE_URL}/auth/logout`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+}
