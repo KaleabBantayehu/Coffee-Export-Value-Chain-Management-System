@@ -4,18 +4,23 @@ import { navigate } from '../routes/navigate'
 const navigationByRole = {
   Admin: [
     { path: '/dashboard', label: 'Dashboard' },
+    { path: '/farmers', label: 'Farmers' },
     { path: '/users', label: 'User management' },
   ],
   'ECTA Officer': [
     { path: '/dashboard', label: 'Dashboard' },
+    { path: '/farmers', label: 'Farmers' },
     { path: '/verification', label: 'QR verification' },
   ],
   'Field/Registry Agent': [
     { path: '/dashboard', label: 'Dashboard' },
-    { path: '/farmers', label: 'Farmer registration' },
+    { path: '/farmers', label: 'Farmers' },
     { path: '/farms', label: 'Farm registration' },
   ],
-  Verifier: [],
+  Verifier: [
+    { path: '/dashboard', label: 'Dashboard' },
+    { path: '/farmers', label: 'Farmers' },
+  ],
 }
 
 function Navigation() {
