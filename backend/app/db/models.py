@@ -80,6 +80,7 @@ class Farmer(Base):
     phone_number: Mapped[str | None] = mapped_column(String(64), nullable=True)
     cooperative_id: Mapped[int | None] = mapped_column(ForeignKey("cooperatives.cooperative_id"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    farms: Mapped[list["Farm"]] = relationship("Farm", back_populates="farmer")
 
 
 class Farm(Base):
@@ -88,9 +89,10 @@ class Farm(Base):
     farm_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     farmer_id: Mapped[int] = mapped_column(ForeignKey("farmers.farmer_id"), nullable=False)
     polygon_geom: Mapped[object] = mapped_column(Geometry("POLYGON", srid=4326, spatial_index=False), nullable=False)
-    area_hectares: Mapped[float] = mapped_column(Numeric(12, 4), nullable=False)
-    eudr_risk_flag: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    area_hectares: Mapped[float | None] = mapped_column(Numeric(12, 4), nullable=True)
+    eudr_risk_flag: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    farmer: Mapped[Farmer] = relationship("Farmer", back_populates="farms")
 
 
 class CoffeeLot(Base):
