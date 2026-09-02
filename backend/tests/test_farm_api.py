@@ -132,8 +132,9 @@ class FarmApiTests(unittest.TestCase):
         )
         self.assertEqual(status, 201)
         self.assertEqual(created["geometry"], self.polygon())
-        self.assertIsNone(created["area_hectares"])
-        self.assertIsNone(created["eudr_risk_flag"])
+        self.assertGreater(created["area_hectares"], 0)
+        self.assertTrue(created["eudr_risk_flag"])
+        self.assertIn("Demonstration review", created["eudr_check_type"])
 
         status, retrieved = self.request("GET", f"/api/v1/farms/{created['farm_id']}", self.token_for("Verifier"))
         self.assertEqual(status, 200)
@@ -146,8 +147,8 @@ class FarmApiTests(unittest.TestCase):
             ).one()
         self.assertEqual(geometry_type, "POLYGON")
         self.assertEqual(srid, 4326)
-        self.assertTrue(area_is_null)
-        self.assertTrue(risk_is_null)
+        self.assertFalse(area_is_null)
+        self.assertFalse(risk_is_null)
 
     def test_agent_creates_point_plus_radius_farm(self):
         status, created = self.request(
@@ -158,8 +159,23 @@ class FarmApiTests(unittest.TestCase):
         )
         self.assertEqual(status, 201)
         self.assertEqual(created["geometry"]["type"], "Polygon")
-        self.assertIsNone(created["area_hectares"])
-        self.assertIsNone(created["eudr_risk_flag"])
+        self.assertGreater(created["area_hectares"], 0)
+        self.assertFalse(created["eudr_risk_flag"])
+
+        status, validated = self.request("POST", f"/api/v1/farms/{created['farm_id']}/validate", self.token_for("Admin"))
+        self.assertEqual(status, 200)
+        self.assertEqual(validated["area_hectares"], created["area_hectares"])
+        self.assertEqual(validated["eudr_risk_flag"], created["eudr_risk_flag"])
+
+    def test_geography_area_for_100_meter_radius_is_reasonable(self):
+        status, created = self.request(
+            "POST", "/api/v1/farms", self.token_for("Field/Registry Agent"),
+            {"farmer_id": self.new_farmer(), "geometry": {"type": "Point", "coordinates": [38.75, 9.00]}, "radius_meters": 100},
+        )
+        self.assertEqual(status, 201)
+        # pi * 100m^2 is about 3.14 hectares; tolerance permits PostGIS geodesic buffering.
+        self.assertAlmostEqual(created["area_hectares"], 3.1416, delta=0.05)
+        self.assertFalse(created["eudr_risk_flag"])
 
     def test_invalid_geometry_missing_farmer_and_authorization_are_rejected(self):
         farmer_id = self.new_farmer()
@@ -185,6 +201,12 @@ class FarmApiTests(unittest.TestCase):
         self.assertEqual(status, 401)
         status, _ = self.request("GET", "/api/v1/farms/999999999", self.token_for("Admin"))
         self.assertEqual(status, 404)
+        status, _ = self.request("POST", "/api/v1/farms/999999999/validate", self.token_for("Admin"))
+        self.assertEqual(status, 404)
+        status, _ = self.request("POST", "/api/v1/farms/999999999/validate", self.token_for("Verifier"))
+        self.assertEqual(status, 403)
+        status, _ = self.request("POST", "/api/v1/farms/999999999/validate")
+        self.assertEqual(status, 401)
 
 
 if __name__ == "__main__":

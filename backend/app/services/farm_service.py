@@ -93,6 +93,23 @@ def create_farm(session: Session, *, farmer_id: int, geometry: dict[str, Any], r
     )
     session.add(farm)
     session.commit()
+    validate_farm(session, farm.farm_id)
+    return farm
+
+
+def validate_farm(session: Session, farm_id: int) -> Farm:
+    farm = session.query(Farm).filter(Farm.farm_id == farm_id).one_or_none()
+    if farm is None:
+        raise FarmNotFoundError(f"Farm {farm_id} not found.")
+    area_hectares = session.execute(
+        text("SELECT ST_Area(polygon_geom::geography) / 10000 FROM farms WHERE farm_id = :farm_id"),
+        {"farm_id": farm_id},
+    ).scalar_one()
+    if area_hectares is None or area_hectares <= 0:
+        raise InvalidGeometryError("Farm geometry has no calculable area.")
+    farm.area_hectares = area_hectares
+    farm.eudr_risk_flag = area_hectares > 10
+    session.commit()
     session.refresh(farm)
     return farm
 

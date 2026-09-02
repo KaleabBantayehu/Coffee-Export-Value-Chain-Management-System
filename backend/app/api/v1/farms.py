@@ -60,3 +60,19 @@ async def get_farm(
     except farm_service.FarmNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Farm not found.") from None
     return _response(farm, geometry)
+
+
+@router.post("/{farm_id}/validate", response_model=FarmResponse, responses={400: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}, 404: {"model": ErrorResponse}})
+async def validate_farm(
+    farm_id: int,
+    _: User = Depends(require_farm_management),
+    session: Session = Depends(get_db),
+) -> FarmResponse:
+    try:
+        farm = farm_service.validate_farm(session, farm_id)
+        _, geometry = farm_service.get_farm(session, farm_id)
+    except farm_service.FarmNotFoundError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Farm not found.") from None
+    except farm_service.InvalidGeometryError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
+    return _response(farm, geometry)

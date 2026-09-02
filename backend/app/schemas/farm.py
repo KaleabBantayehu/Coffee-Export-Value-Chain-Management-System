@@ -16,4 +16,5 @@ class FarmResponse(BaseModel):
     geometry: dict[str, Any]
     area_hectares: float | None = None
     eudr_risk_flag: bool | None = None
+    eudr_check_type: str = "Demonstration review check (10-hectare area threshold; not EUDR compliance)."
     created_at: datetime
