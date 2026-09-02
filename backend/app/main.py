@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 from jose import JWTError
 
 from app.api.v1.auth import router as auth_router
+from app.api.v1.farmers import router as farmers_router
 from app.api.v1.users import router as users_router
 
 
@@ -11,6 +12,7 @@ def create_app() -> FastAPI:
     app = FastAPI(title="CEVCMS Backend")
     app.include_router(auth_router, prefix="/api/v1")
     app.include_router(users_router, prefix="/api/v1")
+    app.include_router(farmers_router, prefix="/api/v1")
 
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(_: Request, exc: RequestValidationError) -> JSONResponse:
