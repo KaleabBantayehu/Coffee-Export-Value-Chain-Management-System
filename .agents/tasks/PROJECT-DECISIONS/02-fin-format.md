@@ -1,5 +1,7 @@
 # PD-002 - FIN Format Decision
 
+**Decision date:** 2026-09-02
+
 ## Objective
 
 Resolve the V1.0 Farmer Identification Number format without allowing an implementation task to invent one.
@@ -17,44 +19,72 @@ FARM-001 cannot finalize generation/validation or stable fixtures while authorit
 - Implementation Specification EPIC-2 Farmer/FIN task.
 - [EPIC-2 overview](../EPIC-2/00-epic-overview.md), “Known Ambiguities”, item 1.
 
-## Current documented position
+## Context
 
-The two SRS references conflict on the first numeric segment: four digits in `FR-FARM-001`, three digits in `UC-01`. The Design Document narrows the implementation to V1.0 farmer registration and uniqueness but does not select a shape. EPIC-2-FARM-001 correctly marks the issue as blocking and requires escalation.
+The two SRS references conflict on the first numeric segment. `FR-FARM-001`
+specifies `ETH-FAR-XXXX-XXXXXX`, while UC-01 specifies
+`ETH-FAR-XXX-XXXXXX`. The Design Document requires generated, unique FINs but
+does not resolve the segment length.
+
+## Conflicting formats
+
+1. `ETH-FAR-XXXX-XXXXXX`
+2. `ETH-FAR-XXX-XXXXXX`
+
+## Approved canonical format
+
+**CEVCMS V1.0 uses `ETH-FAR-XXXX-XXXXXX` as its canonical FIN format.**
+
+Segment interpretation for V1.0:
+
+- `ETH` = Ethiopia.
+- `FAR` = Farmer.
+- `XXXX` = a four-character regional or registration segment placeholder.
+- `XXXXXX` = a six-character unique farmer sequence placeholder.
+
+The placeholders do not currently represent a specified official Ethiopian
+administrative code or prescribed generation scheme. A later approved
+requirement may define their generation semantics without changing this
+canonical V1.0 format.
+
+## Rationale
+
+The approved format adopts the explicit functional-requirement form in
+`FR-FARM-001`. It resolves the same-document conflict before identifier
+generation, validation, fixtures, and downstream Farmer/Farm relationships
+are implemented.
 
 ## Impact
 
 The format affects FARM-001 validation/generation, FARM-002 API responses, FARM-005/EPIC-5 Farmer screens, fixtures, traceability records, and any later public/QR display of Farmer-related identifiers. Regenerating identifiers after implementation would invalidate data and evidence.
 
-## Options
-
-1. Use the functional requirement's four-digit form: `ETH-FAR-XXXX-XXXXXX`.
-2. Use the use case's three-digit form: `ETH-FAR-XXX-XXXXXX`.
-3. Approve another format only through a documented scope/requirements decision.
-4. Defer Farmer implementation; no format-dependent coding.
-
-## Recommended resolution
-
-Recommendation only: prefer the explicit functional requirement (`FR-FARM-001`) over the use-case example if the approved hierarchy treats the SRS functional requirement as controlling detail. This remains subject to the authority decision PD-001 and Project Manager approval; no code may adopt it yet.
-
 ## Decision status
 
-**UNRESOLVED - Project Manager approval required.** Final approved format: `UNRESOLVED`.
+**APPROVED - Project Manager decision.** Final approved format:
+`ETH-FAR-XXXX-XXXXXX`.
 
 ## Approval authority
 
 Project Manager Kaleab, with Yedenekachew as Farmer/Polygon owner and Kidus recording the requirements decision.
 
-## Dependencies
+## Scope and impact
 
-PD-001 authority hierarchy. Blocks finalization of EPIC-2-FARM-001 and any downstream task that asserts a FIN pattern. Does not block non-format planning.
+This decision applies to FIN generation, validation, Farmer API responses,
+frontend Farmer displays, fixtures, traceability references, and later FIN
+presentation. It changes no other identifier format, business rule, schema,
+or role model.
+
+Future EPIC-2 implementation, beginning with `EPIC-2-FARM-001`, must use
+`ETH-FAR-XXXX-XXXXXX` consistently unless a higher-level approved project
+requirement explicitly replaces it.
 
 ## Acceptance criteria
 
 - Every cited FIN reference and both conflicting shapes are recorded.
-- Approved final format is a single exact string with validation semantics.
-- Downstream tasks identify the approved decision as their source.
-- Until approval, FARM-001 explicitly rejects developer-selected formats and uses escalation.
+- The approved final format is a single exact string.
+- Downstream tasks identify this approved decision as their source.
 
 ## Developer/PM handoff instructions
 
-**DO NOT IMPLEMENT UNTIL APPROVED.** FARM-001 may prepare isolated collision/validation structure only if it does not encode an unapproved format; no Farmer fixture may claim a final FIN shape.
+`EPIC-2-FARM-001` is unblocked for its format-dependent generation and
+validation work. It must use the approved canonical format above.
