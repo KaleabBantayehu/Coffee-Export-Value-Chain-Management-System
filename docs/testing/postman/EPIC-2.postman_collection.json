@@ -1,0 +1,121 @@
+{
+  "info": {
+    "_postman_id": "e9f0a181-ef07-4b18-a5a8-7d99e7cb1e01",
+    "name": "CEVCMS EPIC-2 Farmer and Polygon Registry",
+    "description": "Sanitized EPIC-2 API verification workflow. Set the empty credential/token variables locally; do not commit their values. Requests use only synthetic demonstration data.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://127.0.0.1:8000", "type": "string" },
+    { "key": "managementUsername", "value": "", "type": "string" },
+    { "key": "managementPassword", "value": "", "type": "string" },
+    { "key": "managementToken", "value": "", "type": "string" },
+    { "key": "readOnlyToken", "value": "", "type": "string" },
+    { "key": "farmerId", "value": "", "type": "string" },
+    { "key": "farmId", "value": "", "type": "string" },
+    { "key": "pointFarmId", "value": "", "type": "string" },
+    { "key": "demoNationalId", "value": "EPIC2-DEMO-001", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login as authorized farm manager",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"{{managementUsername}}\",\n  \"password\": \"{{managementPassword}}\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('returns 200', () => pm.response.to.have.status(200));", "pm.collectionVariables.set('managementToken', pm.response.json().access_token);"] } }]
+        }
+      ]
+    },
+    {
+      "name": "Farmer workflow",
+      "item": [
+        {
+          "name": "Create Farmer and capture FIN",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{managementToken}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"full_name\": \"EPIC Two Demonstration Farmer\",\n  \"national_id\": \"{{demoNationalId}}\",\n  \"gender\": \"Unspecified\",\n  \"phone_number\": \"+251900000000\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/api/v1/farmers"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('returns 201', () => pm.response.to.have.status(201));", "const body = pm.response.json();", "pm.expect(body.fin_code).to.match(/^ETH-FAR-\\d{4}-\\d{6}$/);", "pm.collectionVariables.set('farmerId', body.farmer_id);"] } }]
+        },
+        {
+          "name": "List/search Farmer",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{managementToken}}" }], "url": "{{baseUrl}}/api/v1/farmers?search=EPIC%20Two" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('returns 200', () => pm.response.to.have.status(200));", "pm.expect(pm.response.json()).to.be.an('array');"] } }]
+        },
+        {
+          "name": "Get Farmer details",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{managementToken}}" }], "url": "{{baseUrl}}/api/v1/farmers/{{farmerId}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('returns 200', () => pm.response.to.have.status(200));", "pm.expect(pm.response.json().farmer_id).to.eql(Number(pm.collectionVariables.get('farmerId')));"] } }]
+        },
+        {
+          "name": "Update Farmer",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{managementToken}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"full_name\": \"EPIC Two Demonstration Farmer Updated\",\n  \"national_id\": \"{{demoNationalId}}\",\n  \"gender\": \"Unspecified\",\n  \"phone_number\": \"+251900000000\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/api/v1/farmers/{{farmerId}}"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('returns 200', () => pm.response.to.have.status(200));"] } }]
+        }
+      ]
+    },
+    {
+      "name": "Farm workflow",
+      "item": [
+        {
+          "name": "Create six-vertex Polygon Farm",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{managementToken}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"farmer_id\": {{farmerId}},\n  \"geometry\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [[[38.75, 9.0], [38.76, 9.0], [38.77, 9.01], [38.76, 9.02], [38.75, 9.02], [38.74, 9.01], [38.75, 9.0]]]\n  }\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/api/v1/farms"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('returns 201', () => pm.response.to.have.status(201));", "const body = pm.response.json();", "pm.expect(body.area_hectares).to.be.above(0);", "pm.expect(body.eudr_check_type).to.include('Demonstration review');", "pm.collectionVariables.set('farmId', body.farm_id);"] } }]
+        },
+        {
+          "name": "Get Polygon Farm",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{managementToken}}" }], "url": "{{baseUrl}}/api/v1/farms/{{farmId}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('returns 200', () => pm.response.to.have.status(200));", "pm.expect(pm.response.json().geometry.type).to.eql('Polygon');"] } }]
+        },
+        {
+          "name": "Revalidate Polygon Farm",
+          "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{managementToken}}" }], "url": "{{baseUrl}}/api/v1/farms/{{farmId}}/validate" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('returns 200', () => pm.response.to.have.status(200));", "pm.expect(pm.response.json().area_hectares).to.be.above(0);"] } }]
+        },
+        {
+          "name": "Create Point-plus-radius Farm",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{managementToken}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"farmer_id\": {{farmerId}},\n  \"geometry\": { \"type\": \"Point\", \"coordinates\": [38.75, 9.0] },\n  \"radius_meters\": 100\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/api/v1/farms"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('returns 201', () => pm.response.to.have.status(201));", "const body = pm.response.json();", "pm.expect(body.geometry.type).to.eql('Polygon');", "pm.expect(body.area_hectares).to.be.above(0);", "pm.collectionVariables.set('pointFarmId', body.farm_id);"] } }]
+        }
+      ]
+    },
+    {
+      "name": "Authorization checks",
+      "item": [
+        {
+          "name": "Unauthenticated Farm creation rejected",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"farmer_id\": {{farmerId}},\n  \"geometry\": { \"type\": \"Point\", \"coordinates\": [38.75, 9.0] },\n  \"radius_meters\": 100\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/v1/farms" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('returns 401', () => pm.response.to.have.status(401));"] } }]
+        },
+        {
+          "name": "Read-only role Farm creation rejected",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{readOnlyToken}}" }], "body": { "mode": "raw", "raw": "{\n  \"farmer_id\": {{farmerId}},\n  \"geometry\": { \"type\": \"Point\", \"coordinates\": [38.75, 9.0] },\n  \"radius_meters\": 100\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/v1/farms" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('returns 403', () => pm.response.to.have.status(403));"] } }]
+        }
+      ]
+    }
+  ]
+}
