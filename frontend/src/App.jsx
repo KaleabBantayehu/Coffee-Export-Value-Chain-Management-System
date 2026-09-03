@@ -6,6 +6,7 @@ import { navigate } from './routes/navigate'
 import Login from './pages/Login'
 import ProtectedRoute from './routes/ProtectedRoute'
 import Farmers from './pages/Farmers'
+import FarmRegistration from './pages/FarmRegistration'
 import './App.css'
 
 const placeholderLabels = {
@@ -44,6 +45,7 @@ function ApplicationShell() {
   }
 
   if (path === '/farmers') return <ProtectedRoute><Navigation /><Farmers /></ProtectedRoute>
+  if (path === '/farms') return <ProtectedRoute><Navigation /><FarmRegistration /></ProtectedRoute>
 
   const label = path === '/dashboard' ? 'Dashboard' : placeholderLabels[path]
 
