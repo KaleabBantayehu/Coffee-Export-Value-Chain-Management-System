@@ -5,7 +5,7 @@ from app.api.v1.auth import get_current_user
 from app.db.models import User
 from app.db.session import get_db
 from app.schemas.auth import ErrorResponse
-from app.schemas.lot import CoffeeLotCreateRequest, CoffeeLotResponse
+from app.schemas.lot import CoffeeLotCreateRequest, CoffeeLotResponse, TraceabilityEventCreateRequest, TraceabilityEventResponse
 from app.services import lot_service
 
 router = APIRouter(prefix="/lots", tags=["lots"])
@@ -43,3 +43,11 @@ async def create_coffee_lot(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from None
     except lot_service.GinGenerationError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
+
+
+@router.post("/{lot_id}/events", response_model=TraceabilityEventResponse, status_code=status.HTTP_201_CREATED, responses={400: {"model": ErrorResponse}, 401: {"model": ErrorResponse}, 404: {"model": ErrorResponse}})
+async def append_traceability_event(lot_id: int, body: TraceabilityEventCreateRequest, acting_user: User = Depends(get_current_user), session: Session = Depends(get_db)) -> TraceabilityEventResponse:
+    try:
+        return lot_service.append_traceability_event(session, lot_id=lot_id, event_type=body.event_type, notes=body.notes, recorded_by=acting_user.user_id)
+    except lot_service.CoffeeLotNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from None

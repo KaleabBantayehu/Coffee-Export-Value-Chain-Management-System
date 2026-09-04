@@ -18,6 +18,10 @@ class GinGenerationError(CoffeeLotServiceError):
     pass
 
 
+class CoffeeLotNotFoundError(CoffeeLotServiceError):
+    pass
+
+
 def create_coffee_lot(session: Session, *, farm_id: int, created_by: int) -> CoffeeLot:
     """Persist a Lot and its required initial event in one transaction."""
     try:
@@ -53,3 +57,13 @@ def create_coffee_lot(session: Session, *, farm_id: int, created_by: int) -> Cof
     except Exception:
         session.rollback()
         raise
+
+
+def append_traceability_event(session: Session, *, lot_id: int, event_type: str, notes: str | None, recorded_by: int) -> TraceabilityEvent:
+    if session.query(CoffeeLot).filter(CoffeeLot.lot_id == lot_id).one_or_none() is None:
+        raise CoffeeLotNotFoundError(f"Coffee Lot {lot_id} not found.")
+    event = TraceabilityEvent(lot_id=lot_id, event_type=event_type, event_timestamp=datetime.now(timezone.utc), recorded_by=recorded_by, notes=notes)
+    session.add(event)
+    session.commit()
+    session.refresh(event)
+    return event

@@ -58,7 +58,7 @@ class CoffeeLotApiTests(unittest.TestCase):
 
         with Session(cls.engine) as session:
             cls.roles = {}
-            for role_name in ("Admin", "Field/Registry Agent", "Verifier"):
+            for role_name in ("Admin", "ECTA Officer", "Field/Registry Agent", "Verifier"):
                 role = session.query(Role).filter(Role.role_name == role_name).one_or_none()
                 if role is None:
                     role = Role(role_name=role_name)
@@ -170,6 +170,29 @@ class CoffeeLotApiTests(unittest.TestCase):
             after_events = session.query(TraceabilityEvent).join(CoffeeLot).filter(CoffeeLot.farm_id == self.farm_id).count()
         self.assertEqual(after_lots, before_lots)
         self.assertEqual(after_events, before_events)
+
+    def test_any_authenticated_role_can_append_events_in_order(self):
+        status, lot = self.request("POST", "/api/v1/lots", self.token_for("Admin"), {"farm_id": self.farm_id})
+        self.assertEqual(status, 201)
+        for role_name in ("Admin", "ECTA Officer", "Field/Registry Agent", "Verifier"):
+            status, event = self.request("POST", f"/api/v1/lots/{lot['lot_id']}/events", self.token_for(role_name), {"event_type": f"{role_name} event", "notes": "Synthetic test event"})
+            self.assertEqual(status, 201)
+            self.assertEqual(event["recorded_by"], self.user_ids[role_name])
+        with Session(self.engine) as session:
+            events = session.query(TraceabilityEvent).filter(TraceabilityEvent.lot_id == lot["lot_id"]).order_by(TraceabilityEvent.event_id).all()
+        self.assertEqual([event.event_type for event in events][1:], ["Admin event", "ECTA Officer event", "Field/Registry Agent event", "Verifier event"])
+
+    def test_event_auth_validation_and_missing_lot_are_rejected(self):
+        status, lot = self.request("POST", "/api/v1/lots", self.token_for("Admin"), {"farm_id": self.farm_id})
+        self.assertEqual(status, 201)
+        status, _ = self.request("POST", f"/api/v1/lots/{lot['lot_id']}/events", body={"event_type": "Observed"})
+        self.assertEqual(status, 401)
+        status, _ = self.request("POST", "/api/v1/lots/999999999/events", self.token_for("Verifier"), {"event_type": "Observed"})
+        self.assertEqual(status, 404)
+        status, _ = self.request("POST", f"/api/v1/lots/{lot['lot_id']}/events", self.token_for("Verifier"), {"event_type": ""})
+        self.assertEqual(status, 400)
+        status, _ = self.request("POST", f"/api/v1/lots/{lot['lot_id']}/events", self.token_for("Verifier"), {})
+        self.assertEqual(status, 400)
 
 
 if __name__ == "__main__":
