@@ -194,6 +194,41 @@ class CoffeeLotApiTests(unittest.TestCase):
         status, _ = self.request("POST", f"/api/v1/lots/{lot['lot_id']}/events", self.token_for("Verifier"), {})
         self.assertEqual(status, 400)
 
+    def test_authenticated_trace_retrieval_returns_origin_and_ordered_events(self):
+        status, lot = self.request("POST", "/api/v1/lots", self.token_for("Admin"), {"farm_id": self.farm_id})
+        self.assertEqual(status, 201)
+        for event_type in ("received_at_station", "quality_checked"):
+            status, _ = self.request(
+                "POST",
+                f"/api/v1/lots/{lot['lot_id']}/events",
+                self.token_for("Verifier"),
+                {"event_type": event_type},
+            )
+            self.assertEqual(status, 201)
+
+        for role_name in ("Admin", "ECTA Officer", "Field/Registry Agent", "Verifier"):
+            status, trace = self.request("GET", f"/api/v1/lots/{lot['lot_id']}/trace", self.token_for(role_name))
+            self.assertEqual(status, 200)
+        self.assertEqual(trace["lot"]["lot_id"], lot["lot_id"])
+        self.assertEqual(trace["lot"]["gin_code"], lot["gin_code"])
+        self.assertEqual(trace["farm"]["farm_id"], self.farm_id)
+        self.assertEqual(trace["farm"]["geometry"]["type"], "Polygon")
+        self.assertEqual(trace["farmer"]["farmer_id"], self.created_farmer_ids[0])
+        self.assertEqual(trace["farmer"]["national_id"], f"LOT-NID-{self.marker}")
+        self.assertEqual(trace["farmer"]["phone_number"], None)
+        self.assertEqual(
+            [event["event_type"] for event in trace["events"]],
+            ["lot_created", "received_at_station", "quality_checked"],
+        )
+
+    def test_trace_retrieval_rejects_unauthenticated_and_missing_lot(self):
+        status, _ = self.request("GET", "/api/v1/lots/999999999/trace")
+        self.assertEqual(status, 401)
+
+        status, payload = self.request("GET", "/api/v1/lots/999999999/trace", self.token_for("Admin"))
+        self.assertEqual(status, 404)
+        self.assertEqual(payload, {"detail": "Coffee Lot 999999999 not found."})
+
 
 if __name__ == "__main__":
     unittest.main()

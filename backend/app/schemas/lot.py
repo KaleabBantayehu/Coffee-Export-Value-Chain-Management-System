@@ -2,6 +2,9 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
+from app.schemas.farm import FarmResponse
+from app.schemas.farmer import FarmerResponse
+
 
 class CoffeeLotCreateRequest(BaseModel):
     farm_id: int = Field(..., gt=0)
@@ -28,3 +31,10 @@ class TraceabilityEventResponse(BaseModel):
     event_timestamp: datetime
     recorded_by: int
     notes: str | None = None
+
+
+class LotTraceResponse(BaseModel):
+    lot: CoffeeLotResponse
+    farm: FarmResponse
+    farmer: FarmerResponse
+    events: list[TraceabilityEventResponse]
