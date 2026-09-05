@@ -2,6 +2,7 @@ export const navigationByRole = {
   Admin: [
     { path: '/dashboard', label: 'Dashboard' },
     { path: '/farmers', label: 'Farmers' },
+    { path: '/farms', label: 'Farm registration' },
     { path: '/lots', label: 'Coffee Lots' },
     { path: '/users', label: 'User management' },
   ],
