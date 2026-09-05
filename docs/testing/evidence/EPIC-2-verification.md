@@ -1,7 +1,7 @@
 # EPIC-2 Farmer & Polygon Registry Verification
 
 **Task ID:** EPIC-2-FARM-007  
-**Verification date:** 2026-09-03  
+**Verification date:** 2026-09-04  
 **Branch:** `develop`
 
 ## Scope
@@ -34,11 +34,44 @@ read-only-role rejection workflows. It uses variables for URLs, credentials,
 tokens, and returned identifiers; no credential, JWT, database URL, or private
 connection value is stored.
 
-**Execution status: NOT RUN.** No installed Postman-compatible runner was
-available during this verification pass. The collection has therefore been
-created and structurally reviewed, but no green Postman/Newman execution is
-claimed. Run it against a local environment using synthetic credentials and
-store no populated environment file in the repository.
+**Execution status: PASS.**
+
+The collection was executed successfully against the local backend using
+Newman 6.2.2 and a local, non-committed environment file containing synthetic
+test credentials.
+
+Command:
+
+`newman run .\docs\testing\postman\EPIC-2.postman_collection.json -e .\docs\testing\postman\EPIC-2.local.postman_environment.json`
+
+Result:
+
+- Iterations: 1
+- Requests: 11
+- Failed requests: 0
+- Test scripts: 11
+- Pre-request scripts: 0
+- Assertions: 11
+- Failed assertions: 0
+- Total run duration: approximately 6 seconds
+- Exit code: 0
+
+The successful execution verified:
+
+1. Authorized authentication.
+2. Farmer creation and FIN capture.
+3. Farmer search.
+4. Farmer detail retrieval.
+5. Farmer update.
+6. Six-vertex Polygon Farm creation.
+7. Polygon Farm retrieval.
+8. Polygon Farm revalidation.
+9. Point-plus-radius Farm creation.
+10. Unauthenticated Farm creation rejection with HTTP 401.
+11. Read-only role Farm creation rejection with HTTP 403.
+
+The local environment file used for execution contains local credentials and/or
+tokens and is not committed to the repository.
 
 ## Manual UI verification
 
@@ -59,7 +92,8 @@ Established manual verification evidence confirms the following UI behavior:
 
 No screenshot artifact was supplied or fabricated for this record. A complete
 single-session walkthrough that creates a new synthetic Farmer and both Farm
-modes should still be captured before human EPIC sign-off.
+modes remains recommended for final human EPIC sign-off, but it is not an
+outstanding automated API verification failure.
 
 ## Database/PostGIS verification
 
@@ -90,8 +124,11 @@ this pass did not run a separate ad-hoc database query.
 - The backend emitted a non-fatal `python-dotenv` parse warning for `.env`
   line 14 during tests. It did not prevent the passing regression run and was
   not changed by this verification task.
-- Postman/Newman execution remains outstanding because no compatible runner
-  was available. This is the only outstanding automated API-evidence item.
+- Postman/Newman API verification passed successfully using Newman 6.2.2.
+  The run completed 11 requests and 11 assertions with 0 failures and exit
+  code 0.
+- The local Postman/Newman environment file used during execution is not
+  committed because it contains local credential/token configuration.
 
 ## Scope boundaries
 
@@ -102,9 +139,23 @@ database connection strings.
 
 ## Final EPIC-2 verification status
 
-**INCOMPLETE.** Implementation, backend regression, frontend lint/build,
-manual UI evidence, and automated PostGIS evidence are passing. EPIC-2 cannot
-be signed off, and EPIC-3 must not begin, until the sanitized Postman
-collection is executed successfully against a local synthetic environment and
-the resulting status is recorded here. A final consolidated UI walkthrough
-artifact is also recommended for human sign-off.
+**VERIFICATION COMPLETE — READY FOR HUMAN SIGN-OFF.**
+
+The implemented EPIC-2 Farmer and Polygon Registry has passed:
+
+- Backend regression testing.
+- Frontend lint verification.
+- Frontend production build verification.
+- Automated Farm/PostGIS database verification.
+- Sanitized Postman/Newman API verification.
+- Established manual UI verification.
+
+The Newman collection completed successfully with 11 requests and 11 assertions
+passing, 0 failures, and exit code 0.
+
+A consolidated single-session UI walkthrough or screenshot artifact remains
+recommended for final human review, but no outstanding automated verification
+blocker remains.
+
+No production EUDR compliance, satellite verification, forest verification,
+or external compliance service is claimed by this EPIC.
