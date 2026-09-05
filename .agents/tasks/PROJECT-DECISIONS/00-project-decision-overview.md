@@ -16,6 +16,7 @@ This package records project-level decisions required before assigning the full 
 | PD-006 | `06-qa-sequencing.md`              | EPIC-6 QA-005/QA-006 sequence                                          | UNRESOLVED     |
 | PD-007 | `07-evidence-and-documentation.md` | Locations for QA/evidence/documentation artifacts                      | UNRESOLVED     |
 | PD-008 | `08-epic-readiness-gate.md`        | Gate for assigning an EPIC to implementation                           | UNRESOLVED     |
+| PD-009 | `09-epic3-epic-boundary.md`        | EPIC 3 Traceability versus EPIC 4 Dynamic QR backlog boundary          | RESOLVED       |
 
 ## Decision dependency order
 
@@ -34,6 +35,9 @@ PD-001 authority hierarchy
                     |
                     v
              developer assignment
+
+PD-009 records the approved EPIC-3/EPIC-4 backlog boundary and is required
+before EPIC 3 can be signed off for handoff to EPIC 4.
 ```
 
 PD-001 should be approved first because it governs how all later conflicts are interpreted. PD-002 and PD-003 should be resolved before identifier-dependent implementation. PD-004 must be resolved before QR implementation or QR-specific assertions. PD-005 and PD-006 must be resolved before assigning overlapping frontend or QA work. PD-007 should be approved before QA evidence is produced. PD-008 is the final gate that consumes the preceding decisions and verified dependencies.
