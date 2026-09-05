@@ -136,6 +136,7 @@ Yedenekachew (Backend) / Biniyam + Yedenekachew (Frontend)"):
 | EPIC-2-FARM-005 | `05-frontend-farmer-registration.md` | Frontend Farmer Registration & List/Details View | Biniyam (+ Yedenekachew) |
 | EPIC-2-FARM-006 | `06-frontend-farm-polygon-capture.md` | Frontend Farm Registration, Leaflet Polygon Capture & EUDR/Area Result Panel | Biniyam (+ Yedenekachew) |
 | EPIC-2-FARM-007 | `07-epic2-verification.md` | EPIC 2 End-to-End Verification & EPIC 3 Handoff Readiness | Ephratha (+ Kidus) |
+| EPIC-2-FARM-008 | `08-farm-list-lookup-api.md` | Farm List and Lookup API | Yedenekachew |
 
 ## Dependency Graph
 

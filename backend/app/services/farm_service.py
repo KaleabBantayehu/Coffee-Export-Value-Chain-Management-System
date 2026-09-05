@@ -122,3 +122,10 @@ def get_farm(session: Session, farm_id: int) -> tuple[Farm, dict[str, Any]]:
         raise FarmNotFoundError(f"Farm {farm_id} not found.")
     farm, geometry_json = row
     return farm, json.loads(geometry_json)
+
+
+def list_farms(session: Session, *, farmer_id: int | None = None) -> list[tuple[Farm, dict[str, Any]]]:
+    statement = select(Farm, text("ST_AsGeoJSON(farms.polygon_geom)")).order_by(Farm.farm_id)
+    if farmer_id is not None:
+        statement = statement.where(Farm.farmer_id == farmer_id)
+    return [(farm, json.loads(geometry_json)) for farm, geometry_json in session.execute(statement).all()]

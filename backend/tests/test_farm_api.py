@@ -167,6 +167,37 @@ class FarmApiTests(unittest.TestCase):
         self.assertEqual(validated["area_hectares"], created["area_hectares"])
         self.assertEqual(validated["eudr_risk_flag"], created["eudr_risk_flag"])
 
+    def test_authenticated_users_can_list_and_filter_farms(self):
+        first_farmer_id = self.new_farmer()
+        second_farmer_id = self.new_farmer()
+        status, first = self.request(
+            "POST", "/api/v1/farms", self.token_for("Field/Registry Agent"),
+            {"farmer_id": first_farmer_id, "geometry": self.polygon()},
+        )
+        self.assertEqual(status, 201)
+        status, second = self.request(
+            "POST", "/api/v1/farms", self.token_for("Field/Registry Agent"),
+            {"farmer_id": second_farmer_id, "geometry": self.polygon()},
+        )
+        self.assertEqual(status, 201)
+
+        status, farms = self.request("GET", "/api/v1/farms", self.token_for("Verifier"))
+        self.assertEqual(status, 200)
+        self.assertTrue(any(farm["farm_id"] == first["farm_id"] for farm in farms))
+        self.assertTrue(any(farm["farm_id"] == second["farm_id"] for farm in farms))
+
+        status, filtered = self.request("GET", f"/api/v1/farms?farmer_id={first_farmer_id}", self.token_for("Admin"))
+        self.assertEqual(status, 200)
+        self.assertEqual([farm["farm_id"] for farm in filtered], [first["farm_id"]])
+        self.assertEqual(filtered[0]["geometry"], self.polygon())
+
+    def test_farm_list_requires_authentication_and_valid_filter(self):
+        status, _ = self.request("GET", "/api/v1/farms")
+        self.assertEqual(status, 401)
+
+        status, _ = self.request("GET", "/api/v1/farms?farmer_id=0", self.token_for("Admin"))
+        self.assertEqual(status, 400)
+
     def test_geography_area_for_100_meter_radius_is_reasonable(self):
         status, created = self.request(
             "POST", "/api/v1/farms", self.token_for("Field/Registry Agent"),
