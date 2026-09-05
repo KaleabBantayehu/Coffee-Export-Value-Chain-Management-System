@@ -11,7 +11,7 @@ This package records project-level decisions required before assigning the full 
 | PD-001 | `01-authority-hierarchy.md`        | Authority hierarchy and conflict resolution                            | UNRESOLVED     |
 | PD-002 | `02-fin-format.md`                 | FIN format                                                             | UNRESOLVED     |
 | PD-003 | `03-gin-format.md`                 | GIN format                                                             | UNRESOLVED     |
-| PD-004 | `04-qr-contract.md`                | QR payload, identifier, storage, signing, and public response contract | UNRESOLVED     |
+| PD-004 | `04-qr-contract.md`                | QR payload, identifier, storage, signing, and public response contract | APPROVED       |
 | PD-005 | `05-frontend-ownership.md`         | Feature frontend versus EPIC-5 integration ownership                   | UNRESOLVED     |
 | PD-006 | `06-qa-sequencing.md`              | EPIC-6 QA-005/QA-006 sequence                                          | UNRESOLVED     |
 | PD-007 | `07-evidence-and-documentation.md` | Locations for QA/evidence/documentation artifacts                      | UNRESOLVED     |
