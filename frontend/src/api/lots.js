@@ -22,3 +22,10 @@ export const createLot = (farmId, accessToken) => request('/lots', accessToken, 
   method: 'POST',
   body: JSON.stringify({ farm_id: farmId }),
 })
+
+export const getLotTrace = (lotId, accessToken) => request(`/lots/${lotId}/trace`, accessToken)
+
+export const appendTraceabilityEvent = (lotId, body, accessToken) => request(`/lots/${lotId}/events`, accessToken, {
+  method: 'POST',
+  body: JSON.stringify(body),
+})

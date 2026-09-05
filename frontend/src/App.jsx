@@ -8,6 +8,7 @@ import ProtectedRoute from './routes/ProtectedRoute'
 import Farmers from './pages/Farmers'
 import FarmRegistration from './pages/FarmRegistration'
 import LotRegistration from './pages/LotRegistration'
+import LotTraceView from './pages/LotTraceView'
 import './App.css'
 
 const placeholderLabels = {
@@ -49,6 +50,8 @@ function ApplicationShell() {
   if (path === '/farmers') return <ProtectedRoute><Navigation /><Farmers /></ProtectedRoute>
   if (path === '/farms') return <ProtectedRoute><Navigation /><FarmRegistration /></ProtectedRoute>
   if (path === '/lots') return <ProtectedRoute><Navigation /><LotRegistration /></ProtectedRoute>
+  const traceMatch = path.match(/^\/lots\/(\d+)\/trace$/)
+  if (traceMatch) return <ProtectedRoute><Navigation /><LotTraceView lotId={Number(traceMatch[1])} /></ProtectedRoute>
 
   const label = path === '/dashboard' ? 'Dashboard' : placeholderLabels[path]
 
