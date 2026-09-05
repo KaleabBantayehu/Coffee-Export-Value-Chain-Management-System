@@ -7,12 +7,14 @@ import Login from './pages/Login'
 import ProtectedRoute from './routes/ProtectedRoute'
 import Farmers from './pages/Farmers'
 import FarmRegistration from './pages/FarmRegistration'
+import LotRegistration from './pages/LotRegistration'
 import './App.css'
 
 const placeholderLabels = {
   '/users': 'User management',
   '/farmers': 'Farmer registration',
   '/farms': 'Farm registration',
+  '/lots': 'Coffee Lot registration',
   '/verification': 'QR verification',
 }
 
@@ -46,6 +48,7 @@ function ApplicationShell() {
 
   if (path === '/farmers') return <ProtectedRoute><Navigation /><Farmers /></ProtectedRoute>
   if (path === '/farms') return <ProtectedRoute><Navigation /><FarmRegistration /></ProtectedRoute>
+  if (path === '/lots') return <ProtectedRoute><Navigation /><LotRegistration /></ProtectedRoute>
 
   const label = path === '/dashboard' ? 'Dashboard' : placeholderLabels[path]
 

@@ -10,3 +10,4 @@ async function request(path, accessToken, options = {}) {
 }
 export const createFarm = (body, token) => request('/farms', token, { method: 'POST', body: JSON.stringify(body) })
 export const validateFarm = (id, token) => request(`/farms/${id}/validate`, token, { method: 'POST' })
+export const listFarms = (token) => request('/farms', token)

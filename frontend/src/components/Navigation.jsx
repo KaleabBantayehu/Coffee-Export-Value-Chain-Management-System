@@ -5,6 +5,7 @@ const navigationByRole = {
   Admin: [
     { path: '/dashboard', label: 'Dashboard' },
     { path: '/farmers', label: 'Farmers' },
+    { path: '/lots', label: 'Coffee Lots' },
     { path: '/users', label: 'User management' },
   ],
   'ECTA Officer': [
@@ -16,6 +17,7 @@ const navigationByRole = {
     { path: '/dashboard', label: 'Dashboard' },
     { path: '/farmers', label: 'Farmers' },
     { path: '/farms', label: 'Farm registration' },
+    { path: '/lots', label: 'Coffee Lots' },
   ],
   Verifier: [
     { path: '/dashboard', label: 'Dashboard' },
