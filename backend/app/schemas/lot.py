@@ -50,3 +50,10 @@ class QRGenerationResponse(BaseModel):
     verification_url: str
     image_svg: str
     image_png_data_url: str
+
+
+class QRVerificationResponse(BaseModel):
+    status: str
+    gin_code: str
+    origin_region: str | None = None
+    grade: str | None = None

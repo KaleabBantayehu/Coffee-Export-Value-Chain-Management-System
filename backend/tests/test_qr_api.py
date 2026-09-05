@@ -9,6 +9,7 @@ import unittest
 import urllib.error
 import urllib.request
 import uuid
+from urllib.parse import parse_qs, urlsplit
 
 from geoalchemy2.elements import WKTElement
 from sqlalchemy import create_engine
@@ -18,7 +19,7 @@ from uvicorn import Config, Server
 
 from app.core.config import get_settings
 from app.core.security import create_jwt_token, hash_password
-from app.db.models import CoffeeLot, Farm, Farmer, QRRecord, Role, User
+from app.db.models import CoffeeLot, Cooperative, Farm, Farmer, QRRecord, Role, User
 from app.main import app
 from app.services.qr_service import canonical_payload, sign_payload
 
@@ -56,7 +57,9 @@ class QRGenerationTests(unittest.TestCase):
                 role = s.query(Role).filter(Role.role_name == role_name).one()
                 user = User(username=f"qr-{cls.marker}-{role.role_id}", password_hash=hash_password("TempP@ss1234"), full_name="QR Test", role_id=role.role_id, is_active=True)
                 s.add(user); s.flush(); cls.users[role_name] = user.user_id
-            farmer = Farmer(fin_code=f"QR-FIN-{cls.marker}", full_name="QR Farmer", national_id=f"QR-NID-{cls.marker}")
+            cooperative = Cooperative(name=f"QR Cooperative {cls.marker}", region="Oromia")
+            s.add(cooperative); s.flush()
+            farmer = Farmer(fin_code=f"QR-FIN-{cls.marker}", full_name="QR Farmer", national_id=f"QR-NID-{cls.marker}", cooperative_id=cooperative.cooperative_id)
             s.add(farmer); s.flush()
             farm = Farm(farmer_id=farmer.farmer_id, polygon_geom=WKTElement("POLYGON((38 9,38.01 9,38.02 9.01,38.01 9.02,38 9.02,37.99 9.01,38 9))", srid=4326), area_hectares=1, eudr_risk_flag=False)
             s.add(farm); s.flush()
@@ -68,7 +71,7 @@ class QRGenerationTests(unittest.TestCase):
     def tearDownClass(cls):
         cls.server.stop()
         with cls.engine.begin() as c:
-            c.execute(QRRecord.__table__.delete().where(QRRecord.lot_id == cls.lot_id)); c.execute(CoffeeLot.__table__.delete().where(CoffeeLot.lot_id == cls.lot_id)); c.execute(Farm.__table__.delete().where(Farm.farm_id == cls.farm_id)); c.execute(Farmer.__table__.delete().where(Farmer.farmer_id == cls.farmer_id)); c.execute(User.__table__.delete().where(User.user_id.in_(cls.users.values())))
+            c.execute(QRRecord.__table__.delete().where(QRRecord.lot_id == cls.lot_id)); c.execute(CoffeeLot.__table__.delete().where(CoffeeLot.lot_id == cls.lot_id)); c.execute(Farm.__table__.delete().where(Farm.farm_id == cls.farm_id)); c.execute(Farmer.__table__.delete().where(Farmer.farmer_id == cls.farmer_id)); c.execute(Cooperative.__table__.delete().where(Cooperative.name == f"QR Cooperative {cls.marker}")); c.execute(User.__table__.delete().where(User.user_id.in_(cls.users.values())))
         cls.engine.dispose()
         for key, value in cls.env.items():
             if value is None: os.environ.pop(key, None)
@@ -112,3 +115,37 @@ class QRGenerationTests(unittest.TestCase):
     def test_missing_lot_and_malformed_body(self):
         self.assertEqual(self.request("POST", "/api/v1/lots/999999999/qr", self.token("Admin"), {})[0], 404)
         self.assertEqual(self.request("POST", f"/api/v1/lots/{self.lot_id}/qr", self.token("Admin"), {"regenerate": "bad"})[0], 400)
+
+    def test_public_verification_valid_minimized_and_unauthenticated(self):
+        status, generated = self.request("POST", f"/api/v1/lots/{self.lot_id}/qr", self.token("Admin"), {"regenerate": True})
+        self.assertEqual(status, 201)
+        parsed_url = urlsplit(generated["verification_url"])
+        signature = parse_qs(parsed_url.query)["sig"][0]
+
+        status, verified = self.request("GET", f"/api/v1/verify/{generated['qr_id']}?sig={signature}")
+        self.assertEqual(status, 200)
+        self.assertEqual(verified, {
+            "status": "valid",
+            "gin_code": f"ETH-LOT-2026-{self.marker[:6]}",
+            "origin_region": "Oromia",
+            "grade": None,
+        })
+        self.assertNotIn("full_name", verified)
+        self.assertNotIn("national_id", verified)
+        self.assertNotIn("phone_number", verified)
+        self.assertNotIn("hmac_signature", verified)
+
+    def test_public_verification_rejects_tampered_malformed_unknown_and_inactive(self):
+        status, generated = self.request("POST", f"/api/v1/lots/{self.lot_id}/qr", self.token("Admin"), {"regenerate": True})
+        self.assertEqual(status, 201)
+        signature = parse_qs(urlsplit(generated["verification_url"]).query)["sig"][0]
+        tampered = signature[:-1] + ("A" if signature[-1] != "A" else "B")
+
+        self.assertEqual(self.request("GET", f"/api/v1/verify/{generated['qr_id']}?sig={tampered}")[0], 400)
+        self.assertEqual(self.request("GET", f"/api/v1/verify/{generated['qr_id']}")[0], 400)
+        self.assertEqual(self.request("GET", f"/api/v1/verify/999999999?sig={signature}")[0], 404)
+
+        status, regenerated = self.request("POST", f"/api/v1/lots/{self.lot_id}/qr", self.token("Admin"), {"regenerate": True})
+        self.assertEqual(status, 201)
+        self.assertEqual(self.request("GET", f"/api/v1/verify/{generated['qr_id']}?sig={signature}")[0], 404)
+        self.assertNotEqual(generated["qr_id"], regenerated["qr_id"])
