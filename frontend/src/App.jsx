@@ -4,6 +4,7 @@ import { useAuth } from './context/useAuth'
 import Navigation from './components/Navigation'
 import { navigate } from './routes/navigate'
 import Login from './pages/Login'
+import Dashboard from './pages/Dashboard'
 import ProtectedRoute from './routes/ProtectedRoute'
 import Farmers from './pages/Farmers'
 import FarmRegistration from './pages/FarmRegistration'
@@ -22,7 +23,7 @@ const placeholderLabels = {
 }
 
 function ApplicationShell() {
-  const { isAuthenticated, role } = useAuth()
+  const { accessToken, isAuthenticated, role } = useAuth()
   const [path, setPath] = useState(window.location.pathname)
 
   useEffect(() => {
@@ -54,6 +55,7 @@ function ApplicationShell() {
 
   if (publicQrId !== null) return <PublicQrVerification key={`${publicQrId}${window.location.search}`} qrId={publicQrId} />
 
+  if (path === '/dashboard') return <ProtectedRoute><Navigation /><Dashboard key={accessToken} /></ProtectedRoute>
   if (path === '/farmers') return <ProtectedRoute><Navigation /><Farmers /></ProtectedRoute>
   if (path === '/farms') return <ProtectedRoute><Navigation /><FarmRegistration /></ProtectedRoute>
   if (path === '/lots') return <ProtectedRoute><Navigation /><LotRegistration /></ProtectedRoute>
@@ -62,7 +64,7 @@ function ApplicationShell() {
   const qrMatch = path.match(/^\/lots\/(\d+)\/qr$/)
   if (qrMatch) return <ProtectedRoute><Navigation /><QRGeneration lotId={Number(qrMatch[1])} /></ProtectedRoute>
 
-  const label = path === '/dashboard' ? 'Dashboard' : placeholderLabels[path]
+  const label = placeholderLabels[path]
 
   return (
     <ProtectedRoute>
