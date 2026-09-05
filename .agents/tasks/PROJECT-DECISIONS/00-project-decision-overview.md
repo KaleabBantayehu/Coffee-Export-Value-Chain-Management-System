@@ -17,7 +17,7 @@ This package records project-level decisions required before assigning the full 
 | PD-007 | `07-evidence-and-documentation.md` | Locations for QA/evidence/documentation artifacts                      | UNRESOLVED     |
 | PD-008 | `08-epic-readiness-gate.md`        | Gate for assigning an EPIC to implementation                           | UNRESOLVED     |
 | PD-009 | `09-epic3-epic-boundary.md`        | EPIC 3 Traceability versus EPIC 4 Dynamic QR backlog boundary          | RESOLVED       |
-| PD-010 | `10-epic3-trace007-evidence-limitation.md` | EPIC-3 TRACE-007 verification-evidence limitation | ACCEPTED WITH CONDITIONS |
+| PD-010 | `10-epic3-trace007-evidence-limitation.md` | EPIC-3 TRACE-007 verification-evidence limitation | CLOSED BY SUPPLEMENTAL VERIFICATION |
 
 ## Decision dependency order
 
