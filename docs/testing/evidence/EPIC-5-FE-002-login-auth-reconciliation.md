@@ -2,7 +2,7 @@
 
 **Task:** EPIC-5-FE-002 — Login UI and Authentication-State Integration
 
-**Status:** READY FOR COPILOT BROWSER VERIFICATION
+**Status:** COMPLETED
 
 ## Reconciliation matrix
 
@@ -30,18 +30,24 @@ when the login response already supplies the state the existing shell uses.
 - `frontend/src/api/auth.js`
 - `frontend/src/App.jsx`
 
-## Remaining browser-only evidence
+## Browser-only evidence
 
-Codex did not perform browser automation. Copilot should verify the existing
-implementation with synthetic credentials:
+Codex did not perform browser automation. Copilot performed the required
+synthetic-credential browser checks, recorded below. No source change was
+required for FE-002.
 
-1. Valid login stores the active session and reaches `/dashboard`.
-2. Invalid credentials show the generic bounded error and leave the user
-   unauthenticated.
-3. Missing required input is blocked by the form.
-4. The submit button presents its loading state and prevents duplicate
-   submission.
-5. Auth state is observable in the authenticated shell/navigation.
+## Supplemental browser verification
 
-No source change is required for FE-002. FE-003 and later tasks were not
-started.
+**Verification date:** 2026-09-05
+**Synthetic role:** Admin
+
+- **Valid login:** PASS. A valid synthetic login request succeeded and navigated to `/dashboard`.
+- **Dashboard/protected navigation:** PASS. The authenticated shell rendered the protected Dashboard and remained authenticated during the session.
+- **Auth-state visibility:** PASS. The shell displayed the Admin role, authenticated navigation options, role-appropriate Coffee Lots/User management controls, and a Log out control.
+- **Invalid credentials:** PASS. Invalid synthetic credentials remained on `/login` and displayed the bounded message `Invalid username or password.` No stack trace, token, password, or server internals were shown.
+- **Required-field validation:** PASS. Empty username, empty password, and both empty prevented submission through the existing required-field validation; no login request was sent for the both-empty case.
+- **Loading and duplicate-submit prevention:** PASS. With the login response deliberately delayed for observation, the button displayed `Signing in…`, became disabled, and two rapid submission attempts produced one login request. The UI returned to the authenticated dashboard afterward.
+- **Security/minimization:** PASS. The password was not rendered back after submission, no JWT appeared in page content, and no additional authentication mechanism or frontend secret was introduced.
+
+**Browser verification:** PASS
+**Source changes:** None
