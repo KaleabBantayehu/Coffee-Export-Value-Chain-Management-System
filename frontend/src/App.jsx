@@ -9,6 +9,8 @@ import Farmers from './pages/Farmers'
 import FarmRegistration from './pages/FarmRegistration'
 import LotRegistration from './pages/LotRegistration'
 import LotTraceView from './pages/LotTraceView'
+import QRGeneration from './pages/QRGeneration'
+import PublicQrVerification from './pages/PublicQrVerification'
 import './App.css'
 
 const placeholderLabels = {
@@ -37,21 +39,28 @@ function ApplicationShell() {
     }
   }, [isAuthenticated, path])
 
+  const publicVerificationMatch = path.match(/^\/verify(?:\/([^/]*))?$/)
+  const publicQrId = publicVerificationMatch ? publicVerificationMatch[1] ?? '' : null
+
   useEffect(() => {
-    if (!isAuthenticated && path !== '/login') {
+    if (!isAuthenticated && path !== '/login' && publicQrId === null) {
       navigate('/login')
     }
-  }, [isAuthenticated, path])
+  }, [isAuthenticated, path, publicQrId])
 
   if (path === '/login') {
     return <Login />
   }
+
+  if (publicQrId !== null) return <PublicQrVerification key={`${publicQrId}${window.location.search}`} qrId={publicQrId} />
 
   if (path === '/farmers') return <ProtectedRoute><Navigation /><Farmers /></ProtectedRoute>
   if (path === '/farms') return <ProtectedRoute><Navigation /><FarmRegistration /></ProtectedRoute>
   if (path === '/lots') return <ProtectedRoute><Navigation /><LotRegistration /></ProtectedRoute>
   const traceMatch = path.match(/^\/lots\/(\d+)\/trace$/)
   if (traceMatch) return <ProtectedRoute><Navigation /><LotTraceView lotId={Number(traceMatch[1])} /></ProtectedRoute>
+  const qrMatch = path.match(/^\/lots\/(\d+)\/qr$/)
+  if (qrMatch) return <ProtectedRoute><Navigation /><QRGeneration lotId={Number(qrMatch[1])} /></ProtectedRoute>
 
   const label = path === '/dashboard' ? 'Dashboard' : placeholderLabels[path]
 

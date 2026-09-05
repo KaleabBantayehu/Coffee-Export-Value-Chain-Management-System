@@ -125,6 +125,7 @@ class QRRecord(Base):
     payload_hash: Mapped[str] = mapped_column(String(256), nullable=False)
     hmac_signature: Mapped[str] = mapped_column(String(256), nullable=False)
     verification_url: Mapped[str] = mapped_column(String(512), nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     generated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
 
 

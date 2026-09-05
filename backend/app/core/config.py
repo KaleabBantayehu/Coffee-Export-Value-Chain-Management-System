@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     BOOTSTRAP_ADMIN_ROLE_NAME: str = "Admin"
     JWT_SECRET_KEY: str
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    QR_HMAC_SECRET_KEY: str = ""
+    PUBLIC_QR_BASE_URL: str = ""
 
 
 def get_settings() -> Settings:

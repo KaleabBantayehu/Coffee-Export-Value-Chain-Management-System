@@ -7,6 +7,8 @@ from app.api.v1.auth import router as auth_router
 from app.api.v1.farms import router as farms_router
 from app.api.v1.farmers import router as farmers_router
 from app.api.v1.lots import router as lots_router
+from app.api.v1.qr import router as qr_router
+from app.api.v1.verify import router as verify_router
 from app.api.v1.users import router as users_router
 
 
@@ -17,6 +19,8 @@ def create_app() -> FastAPI:
     app.include_router(farmers_router, prefix="/api/v1")
     app.include_router(farms_router, prefix="/api/v1")
     app.include_router(lots_router, prefix="/api/v1")
+    app.include_router(qr_router, prefix="/api/v1")
+    app.include_router(verify_router, prefix="/api/v1")
 
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(_: Request, exc: RequestValidationError) -> JSONResponse:

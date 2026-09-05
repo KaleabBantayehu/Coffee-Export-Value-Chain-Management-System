@@ -1,0 +1,72 @@
+{
+  "info": {
+    "name": "CEVCMS EPIC-4 QR-003 Public Verification API",
+    "description": "Sanitized public QR verification requests. Set qrId and signature from a QR-002 generation response using synthetic data.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "baseUrl", "value": "http://127.0.0.1:8000"},
+    {"key": "qrId", "value": ""},
+    {"key": "signature", "value": ""}
+  ],
+  "item": [
+    {
+      "name": "Verify valid QR",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/v1/verify/{{qrId}}?sig={{signature}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('returns 200', () => pm.response.to.have.status(200));",
+              "pm.expect(pm.response.json()).to.have.all.keys('status', 'gin_code', 'origin_region', 'grade');",
+              "pm.expect(pm.response.json().status).to.eql('valid');"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reject tampered signature",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/v1/verify/{{qrId}}?sig={{signature}}tampered"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('returns 400', () => pm.response.to.have.status(400));",
+              "pm.expect(pm.response.json().detail).to.eql('Invalid QR.');"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reject unknown QR",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/v1/verify/999999999?sig={{signature}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('returns 404', () => pm.response.to.have.status(404));",
+              "pm.expect(pm.response.json().detail).to.eql('QR not found.');"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
