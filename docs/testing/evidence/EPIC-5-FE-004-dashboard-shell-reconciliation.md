@@ -2,7 +2,7 @@
 
 **Task:** EPIC-5-FE-004 — Dashboard and Authenticated Application Shell
 
-**Status:** READY FOR COPILOT BROWSER VERIFICATION
+**Status:** COMPLETED
 
 ## Reconciliation result
 
@@ -52,10 +52,10 @@ FE-004 does not infer one from unrelated endpoints or add a backend API.
 - `frontend/src/App.jsx`
 - `frontend/src/App.css`
 
-## Required browser verification
+## Browser verification scope
 
-Codex did not run browser automation. Copilot should verify with synthetic
-accounts and data:
+Codex did not run browser automation. Copilot completed the required
+synthetic-account browser checks, recorded below:
 
 1. Login reaches the dashboard and renders the protected shell for each
    applicable role.
@@ -69,3 +69,25 @@ accounts and data:
 
 No credentials, JWTs, secrets, local environment values, or Farmer PII are
 included in this evidence file.
+
+## Supplemental browser verification
+
+**Verification date:** 2026-09-05
+
+- **Admin dashboard:** PASS. Login reached `/dashboard`; the protected shell rendered the authenticated dashboard with Admin actions for Farmers, Coffee Lots, and User management.
+- **ECTA Officer dashboard:** PASS. Login reached `/dashboard`; the dashboard rendered with role-appropriate Farmers and QR verification actions and no Admin-only management action.
+- **Field/Registry Agent dashboard:** PASS. Login reached `/dashboard`; the dashboard rendered with Farmers, Farm registration, and Coffee Lots actions.
+- **Verifier dashboard:** PASS. Login reached `/dashboard`; the dashboard rendered with only the role-appropriate Farmers action.
+- **Role actions/navigation:** PASS. Visible dashboard actions stayed within the authenticated shell and matched the existing role mapping; no unsupported action was introduced.
+- **Farmer count:** PASS. The dashboard displayed `4`, matching the authenticated Farmers collection response.
+- **Farm count:** PASS. The dashboard displayed `6`, matching the authenticated Farms collection response.
+- **Coffee Lot count:** PASS — absent as required because no approved collection/count endpoint exists.
+- **Empty state:** PASS. Intercepting the Farmers collection as an empty successful response rendered `No registered farmers.` while the independent Farms widget continued to render its result.
+- **Independent widget failure:** PASS. A controlled Farms HTTP 500 rendered `Unable to load this dashboard count.` while the Farmers widget remained usable; no stack trace or internal detail was shown.
+- **401 session expiry:** PASS. A controlled protected Farmers HTTP 401 cleared auth state and redirected to `/login`.
+- **403 retained session:** PASS. A controlled protected Farmers HTTP 403 rendered the bounded authorization message while the Farms widget and authenticated shell remained available.
+- **Responsive layout:** PASS at approximately 1280px desktop and 390px narrow width; cards/actions remained readable with no horizontal overflow.
+- **Security/error minimization:** PASS. No password, JWT, secret, Farmer detail fields, raw backend exception, or Coffee Lot count appeared in the dashboard.
+
+**Browser verification:** PASS
+**Source changes:** None
