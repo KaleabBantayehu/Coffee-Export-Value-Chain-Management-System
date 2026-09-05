@@ -3,7 +3,7 @@
 **Task:** EPIC-5-FE-003 — Protected Routes, Role-Aware Navigation, Logout,
 and Session Handling
 
-**Status:** READY FOR COPILOT BROWSER VERIFICATION
+**Status:** COMPLETED
 
 ## Ownership resolution
 
@@ -61,10 +61,10 @@ was introduced.
 - `frontend/src/api/farms.js`
 - `frontend/src/api/lots.js`
 
-## Required browser verification
+## Browser verification scope
 
-Codex did not run browser automation. Copilot must verify with synthetic
-accounts and data:
+Codex did not run browser automation. Copilot completed the required
+synthetic-account browser checks, recorded below:
 
 1. Admin navigation.
 2. ECTA Officer navigation.
@@ -79,3 +79,21 @@ accounts and data:
 
 No password, JWT, credential, signing secret, or synthetic personal data is
 recorded in this evidence file.
+
+## Supplemental browser verification
+
+**Verification date:** 2026-09-05
+
+- **Admin navigation:** PASS. Login reached `/dashboard`; the authenticated shell exposed Dashboard, Farmers, Coffee Lots, User management, and Log out.
+- **ECTA Officer navigation:** PASS. The authenticated shell exposed Dashboard, Farmers, QR verification, and Log out, with no Admin-only management actions.
+- **Field/Registry Agent navigation:** PASS. The authenticated shell exposed Dashboard, Farmers, Farm registration, Coffee Lots, and Log out.
+- **Verifier navigation:** PASS. The authenticated shell exposed Dashboard, Farmers, and Log out, with no creation or management actions.
+- **Logout:** PASS. Explicit logout cleared the session and returned to `/login`.
+- **Protected back-navigation:** PASS. Browser Back after logout remained on the logged-out state; the protected page did not become usable again.
+- **401 expired-session cleanup:** PASS. A controlled protected API response of HTTP 401 cleared the authenticated state and navigated to `/login`; no stale protected shell or raw backend detail remained.
+- **403 retained-session handling:** PASS. A controlled protected API response of HTTP 403 displayed the bounded authorization message `You are not authorized to perform this action.`, remained on the protected page, and kept the authenticated Field/Registry Agent shell available.
+- **Public verification:** PASS. Logged out, `/verify/113` with its valid synthetic signature loaded publicly and displayed only the approved Valid status, GIN, and unavailable origin; no login redirect or protected trace data appeared.
+- **Security/error exposure:** PASS. No password, JWT, secret, stack trace, or raw backend internals appeared in the UI. The public route remained independent of authenticated state.
+
+**Browser verification:** PASS
+**Source changes:** None
