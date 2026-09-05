@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.schemas.farm import FarmResponse
 from app.schemas.farmer import FarmerResponse
@@ -38,3 +38,15 @@ class LotTraceResponse(BaseModel):
     farm: FarmResponse
     farmer: FarmerResponse
     events: list[TraceabilityEventResponse]
+
+
+class QRGenerationRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    regenerate: bool = False
+
+
+class QRGenerationResponse(BaseModel):
+    qr_id: int
+    verification_url: str
+    image_svg: str
+    image_png_data_url: str

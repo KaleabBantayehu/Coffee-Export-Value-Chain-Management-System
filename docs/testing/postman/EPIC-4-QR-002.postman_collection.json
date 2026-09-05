@@ -1,0 +1,35 @@
+{
+  "info": {
+    "name": "CEVCMS EPIC-4 QR-002 Generation API",
+    "description": "Sanitized QR-002 requests. Supply synthetic local tokens and an existing Coffee Lot ID in an uncommitted environment.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "baseUrl", "value": "http://127.0.0.1:8000"},
+    {"key": "lotId", "value": ""},
+    {"key": "managerToken", "value": ""},
+    {"key": "readOnlyToken", "value": ""}
+  ],
+  "item": [
+    {
+      "name": "Generate new QR",
+      "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{managerToken}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{}"}, "url": "{{baseUrl}}/api/v1/lots/{{lotId}}/qr"},
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns 201', () => pm.response.to.have.status(201));", "const body = pm.response.json();", "pm.expect(body).to.have.all.keys('qr_id', 'verification_url', 'image_svg', 'image_png_data_url');", "pm.expect(body.image_png_data_url).to.match(/^data:image\\/png;base64,/);", "pm.collectionVariables.set('qrId', body.qr_id);"]}}]
+    },
+    {
+      "name": "Reuse active QR",
+      "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{managerToken}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{}"}, "url": "{{baseUrl}}/api/v1/lots/{{lotId}}/qr"},
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns 200', () => pm.response.to.have.status(200));", "pm.expect(pm.response.json().qr_id).to.eql(Number(pm.collectionVariables.get('qrId')));"]}}]
+    },
+    {
+      "name": "Regenerate QR",
+      "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{managerToken}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"regenerate\": true}"}, "url": "{{baseUrl}}/api/v1/lots/{{lotId}}/qr"},
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns 201', () => pm.response.to.have.status(201));", "pm.expect(pm.response.json().qr_id).to.not.eql(Number(pm.collectionVariables.get('qrId')));"]}}]
+    },
+    {
+      "name": "Read-only generation rejected",
+      "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{readOnlyToken}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{}"}, "url": "{{baseUrl}}/api/v1/lots/{{lotId}}/qr"},
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns 403', () => pm.response.to.have.status(403));"]}}]
+    }
+  ]
+}
