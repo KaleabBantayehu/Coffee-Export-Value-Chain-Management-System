@@ -1,6 +1,8 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { login, logout } from '../api/auth'
+import { registerSessionExpiryHandler } from '../api/sessionExpiry'
+import { navigate } from '../routes/navigate'
 import { AuthContext } from './authContext'
 
 export function AuthProvider({ children }) {
@@ -26,6 +28,14 @@ export function AuthProvider({ children }) {
       setRole(null)
     }
   }, [accessToken])
+
+  const expireSession = useCallback(() => {
+    setAccessToken(null)
+    setRole(null)
+    navigate('/login')
+  }, [])
+
+  useEffect(() => registerSessionExpiryHandler(expireSession), [expireSession])
 
   const value = useMemo(
     () => ({

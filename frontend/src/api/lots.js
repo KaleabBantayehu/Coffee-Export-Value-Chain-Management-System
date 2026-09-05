@@ -1,3 +1,5 @@
+import { throwForProtectedRequest } from './authenticatedRequest'
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api/v1'
 
 async function request(path, accessToken, options = {}) {
@@ -11,9 +13,7 @@ async function request(path, accessToken, options = {}) {
   })
   const body = await response.json().catch(() => ({}))
 
-  if (!response.ok) {
-    throw new Error(body.detail ?? 'Unable to complete the lot request.')
-  }
+  if (!response.ok) throwForProtectedRequest(response, body, 'Unable to complete the lot request.')
 
   return body
 }
