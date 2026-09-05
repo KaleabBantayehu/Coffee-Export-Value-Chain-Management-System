@@ -10,13 +10,14 @@ This package records project-level decisions required before assigning the full 
 | ------ | ---------------------------------- | ---------------------------------------------------------------------- | -------------- |
 | PD-001 | `01-authority-hierarchy.md`        | Authority hierarchy and conflict resolution                            | UNRESOLVED     |
 | PD-002 | `02-fin-format.md`                 | FIN format                                                             | UNRESOLVED     |
-| PD-003 | `03-gin-format.md`                 | GIN format                                                             | UNRESOLVED     |
+| PD-003 | `PD-003 final decision.md`         | GIN format                                                             | APPROVED       |
 | PD-004 | `04-qr-contract.md`                | QR payload, identifier, storage, signing, and public response contract | APPROVED       |
 | PD-005 | `05-frontend-ownership.md`         | Feature frontend versus EPIC-5 integration ownership                   | UNRESOLVED     |
 | PD-006 | `06-qa-sequencing.md`              | EPIC-6 QA-005/QA-006 sequence                                          | UNRESOLVED     |
 | PD-007 | `07-evidence-and-documentation.md` | Locations for QA/evidence/documentation artifacts                      | UNRESOLVED     |
 | PD-008 | `08-epic-readiness-gate.md`        | Gate for assigning an EPIC to implementation                           | UNRESOLVED     |
 | PD-009 | `09-epic3-epic-boundary.md`        | EPIC 3 Traceability versus EPIC 4 Dynamic QR backlog boundary          | RESOLVED       |
+| PD-010 | `10-epic3-trace007-evidence-limitation.md` | EPIC-3 TRACE-007 verification-evidence limitation | ACCEPTED WITH CONDITIONS |
 
 ## Decision dependency order
 
