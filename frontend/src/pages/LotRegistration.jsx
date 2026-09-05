@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { listFarms } from '../api/farms'
 import { createLot } from '../api/lots'
 import { useAuth } from '../context/useAuth'
+import { navigate } from '../routes/navigate'
 
 export default function LotRegistration() {
   const { accessToken, role } = useAuth()
@@ -89,6 +90,11 @@ export default function LotRegistration() {
           <h2>Coffee Lot created</h2>
           <p>GIN: {createdLot.gin_code}</p>
           <p>Status: {createdLot.status}</p>
+          {canRegister && (
+            <button type="button" onClick={() => navigate(`/lots/${createdLot.lot_id}/qr`)}>
+              Generate QR
+            </button>
+          )}
         </article>
       )}
     </section>

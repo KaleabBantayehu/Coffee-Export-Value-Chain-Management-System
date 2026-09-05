@@ -29,3 +29,8 @@ export const appendTraceabilityEvent = (lotId, body, accessToken) => request(`/l
   method: 'POST',
   body: JSON.stringify(body),
 })
+
+export const generateLotQr = (lotId, accessToken) => request(`/lots/${lotId}/qr`, accessToken, {
+  method: 'POST',
+  body: JSON.stringify({}),
+})

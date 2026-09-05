@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react'
 
 import { appendTraceabilityEvent, getLotTrace } from '../api/lots'
 import { useAuth } from '../context/useAuth'
+import { navigate } from '../routes/navigate'
 
 export default function LotTraceView({ lotId }) {
-  const { accessToken } = useAuth()
+  const { accessToken, role } = useAuth()
+  const canGenerateQr = role === 'Admin' || role === 'Field/Registry Agent'
   const [trace, setTrace] = useState(null)
   const [eventType, setEventType] = useState('')
   const [notes, setNotes] = useState('')
@@ -68,6 +70,11 @@ export default function LotTraceView({ lotId }) {
         <p>GIN: {trace.lot.gin_code}</p>
         <p>Status: {trace.lot.status}</p>
         <p>Created: {new Date(trace.lot.created_at).toLocaleString()}</p>
+        {canGenerateQr && (
+          <button type="button" onClick={() => navigate(`/lots/${lotId}/qr`)}>
+            Generate QR
+          </button>
+        )}
       </article>
       <article>
         <h2>Originating Farm</h2>

@@ -9,6 +9,7 @@ import Farmers from './pages/Farmers'
 import FarmRegistration from './pages/FarmRegistration'
 import LotRegistration from './pages/LotRegistration'
 import LotTraceView from './pages/LotTraceView'
+import QRGeneration from './pages/QRGeneration'
 import './App.css'
 
 const placeholderLabels = {
@@ -52,6 +53,8 @@ function ApplicationShell() {
   if (path === '/lots') return <ProtectedRoute><Navigation /><LotRegistration /></ProtectedRoute>
   const traceMatch = path.match(/^\/lots\/(\d+)\/trace$/)
   if (traceMatch) return <ProtectedRoute><Navigation /><LotTraceView lotId={Number(traceMatch[1])} /></ProtectedRoute>
+  const qrMatch = path.match(/^\/lots\/(\d+)\/qr$/)
+  if (qrMatch) return <ProtectedRoute><Navigation /><QRGeneration lotId={Number(qrMatch[1])} /></ProtectedRoute>
 
   const label = path === '/dashboard' ? 'Dashboard' : placeholderLabels[path]
 
