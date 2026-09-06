@@ -18,6 +18,7 @@ This package records project-level decisions required before assigning the full 
 | PD-008 | `08-epic-readiness-gate.md`        | Gate for assigning an EPIC to implementation                           | UNRESOLVED     |
 | PD-009 | `09-epic3-epic-boundary.md`        | EPIC 3 Traceability versus EPIC 4 Dynamic QR backlog boundary          | RESOLVED       |
 | PD-010 | `10-epic3-trace007-evidence-limitation.md` | EPIC-3 TRACE-007 verification-evidence limitation | CLOSED BY SUPPLEMENTAL VERIFICATION |
+| PD-011 | `11-solo-developer-review-exception.md` | Documented owner self-review exception when no second human reviewer is available | APPROVED |
 
 ## Decision dependency order
 
@@ -40,6 +41,11 @@ PD-001 authority hierarchy
 PD-009 records the approved EPIC-3/EPIC-4 backlog boundary and is required
 before EPIC 3 can be signed off for handoff to EPIC 4.
 ```
+
+PD-011 preserves the independent-review rule for multi-person work while
+allowing a documented Project Manager/project-owner self-review only while the
+project has no second human reviewer. It changes no application scope and does
+not bypass branch, test, evidence, security, or blocker controls.
 
 PD-001 should be approved first because it governs how all later conflicts are interpreted. PD-002 and PD-003 should be resolved before identifier-dependent implementation. PD-004 must be resolved before QR implementation or QR-specific assertions. PD-005 and PD-006 must be resolved before assigning overlapping frontend or QA work. PD-007 should be approved before QA evidence is produced. PD-008 is the final gate that consumes the preceding decisions and verified dependencies.
 
@@ -72,6 +78,9 @@ Evidence locations (PD-007) can be deferred only for planning; they should be de
 ## Cross-EPIC impact summary
 
 PD-001 affects every conflict. PD-002 affects EPIC-2, EPIC-3, EPIC-4, and QA fixtures. PD-003 affects EPIC-3, EPIC-4, EPIC-5, and QA fixtures. PD-004 affects EPIC-4, EPIC-5, and EPIC-6. PD-005 affects EPIC-1 through EPIC-5 frontend assignments. PD-006 affects EPIC-5/EPIC-6 handoff. PD-007 affects EPIC-6 and milestone reporting. PD-008 controls assignment readiness for all epics.
+
+PD-011 affects feature-branch review records only while the single-developer
+condition is true; it does not alter task scope or QA execution requirements.
 
 ## Package safety
 
