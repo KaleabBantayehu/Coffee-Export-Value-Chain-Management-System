@@ -2,7 +2,7 @@
 
 ## Status
 
-**COMPLETED — PENDING PM INTEGRATION REVIEW under PD-011.**
+**COMPLETED — APPROVED FOR INTEGRATION under PD-011.**
 
 ## Scope, baseline, and environment
 
@@ -109,12 +109,12 @@ The only environment observation is the pre-existing local dotenv parser warning
 - **Task/branch:** EPIC-6-QA-005 / `feature/epic-6-qa-005-integration-core-chain`.
 - **Author:** Kaleab Bantayehu, Project Manager/project owner.
 - **Reason the documented solo-review path applies:** this is a genuine single-developer project with no separate human reviewer available; PD-011 governs owner review and integration.
-- **Exact reviewed delta:** this evidence record and the sanitized QA-005 Newman collection only. No application source, local credential/environment file, database dump, protected prompt, or later QA task is in scope.
+- **Exact reviewed delta:** QA-005 commit `293d6bd29dbac41ca25230cdd88e8ba71037469a` contains only this evidence record and the sanitized QA-005 Newman collection. No application source, local credential/environment file, database dump, protected prompt, or later QA task is in scope.
 - **Task-contract review:** PASS. A new same-run API/database chain completed from authenticated Farmer creation through anonymous public QR verification; database links, automatic and appended events, trace ordering, QR lifecycle, sanitization, and automated regression were verified. Browser verification was intentionally deferred to QA-006 under PD-006.
 - **Execution evidence reviewed:** 10 Newman requests / 10 assertions / 0 failures; read-only relationship chain; 74/74 backend regression; collection JSON validation; and `git diff --check` before commit.
 - **Defects/blockers:** none found. The local dotenv parser warning is non-blocking and unchanged.
-- **Approval state:** pending Project Manager integration review. No AI assistant or tool is represented as an independent human reviewer.
+- **Approval state:** **APPROVED FOR INTEGRATION** by the Project Manager/project owner under PD-011 on 2026-09-06. No AI assistant or tool is represented as an independent human reviewer.
 
 ## Final status
 
-**COMPLETED — PENDING PM INTEGRATION REVIEW.** The QA-005 API/database core-chain exit criteria are satisfied. The next authorized activity is PM integration review; QA-006 is not started by this task.
+**COMPLETED — APPROVED FOR INTEGRATION.** The QA-005 API/database core-chain exit criteria are satisfied. QA-006 is the next approved sequencing step and is not started by this task.
