@@ -12,7 +12,7 @@ This package records project-level decisions required before assigning the full 
 | PD-002 | `02-fin-format.md`                 | FIN format                                                             | UNRESOLVED     |
 | PD-003 | `PD-003 final decision.md`         | GIN format                                                             | APPROVED       |
 | PD-004 | `04-qr-contract.md`                | QR payload, identifier, storage, signing, and public response contract | APPROVED       |
-| PD-005 | `05-frontend-ownership.md`         | Feature frontend versus EPIC-5 integration ownership                   | UNRESOLVED     |
+| PD-005 | `05-frontend-ownership.md`         | Feature frontend versus EPIC-5 integration ownership                   | APPROVED       |
 | PD-006 | `06-qa-sequencing.md`              | EPIC-6 QA-005/QA-006 sequence                                          | UNRESOLVED     |
 | PD-007 | `07-evidence-and-documentation.md` | Locations for QA/evidence/documentation artifacts                      | UNRESOLVED     |
 | PD-008 | `08-epic-readiness-gate.md`        | Gate for assigning an EPIC to implementation                           | UNRESOLVED     |
@@ -49,7 +49,8 @@ PD-001 should be approved first because it governs how all later conflicts are i
 - PD-002 blocks final FIN generation/validation and stable Farmer fixtures.
 - PD-003 blocks final GIN generation/validation and stable Lot/QR fixtures.
 - PD-004 blocks EPIC-4 QR implementation and EPIC-5 QR integration.
-- PD-005 blocks assignment of overlapping frontend screen work.
+- PD-005 is approved for EPIC-5 shared-shell integration; changes outside
+  its recorded ownership scope still require Project Manager approval.
 - PD-006 blocks final QA ordering and can create a circular dependency.
 - PD-007 blocks consistent evidence/report storage, though QA planning can proceed.
 - PD-008 blocks formal declaration that downstream EPICs are ready for assignment.

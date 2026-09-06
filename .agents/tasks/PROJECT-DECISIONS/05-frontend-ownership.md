@@ -34,13 +34,33 @@ Without a decision, duplicated components, API clients, routes, divergent valida
 2. EPIC-5 owns all frontend implementation; feature EPIC frontend tasks become contracts/handoffs or are retired by PM.
 3. Keep current overlap with explicit file ownership per task, requiring no shared file to have two owners.
 
-## Recommended resolution
+## Approved resolution
 
-Recommendation only: option 1 or 2 can work, but the project should choose exactly one. The least disruptive model is option 1: feature EPICs own domain screens/components and EPIC-5 owns composition/integration only. Under that model EPIC-5 may modify app composition, route registration, shared shell, and integration wiring; it may not duplicate or redesign feature components, API clients, auth state, or backend contracts.
+The Project Manager approves the following operational ownership model for
+EPIC-5:
+
+- Biniyam is the frontend lead and Abel provides support.
+- EPIC-1 `AUTH-007` remains historically complete and is not reopened.
+- EPIC-5 `FE-003` owns the current frontend shell's protected-route,
+  role-aware navigation, logout/session-cleanup, and invalid/expired-session
+  integration behavior.
+- FE-003 may modify the existing shared frontend auth/API integration where
+  necessary for a protected API `401` to clear stale client auth state and
+  lead to `/login`. It must reuse the existing AuthContext, router, and API
+  helper architecture; it must not create a second auth system.
+- Backend authentication and RBAC remain authoritative. A frontend route
+  guard or navigation visibility rule is not an authorization substitute.
+- This decision resolves Abel's historical EPIC-5 role wording operationally:
+  Biniyam lead; Abel support.
+
+Feature EPICs continue to own their domain API contracts and components.
+EPIC-5 may integrate those existing contracts through the shared shell but
+must not redesign or duplicate them.
 
 ## Decision status
 
-**UNRESOLVED - Project Manager approval required.** Final ownership model: `UNRESOLVED`.
+**APPROVED - Project Manager decision recorded.** Final ownership model:
+`EPIC-5 shared-shell integration ownership as specified above`.
 
 ## Approval authority
 
@@ -48,7 +68,7 @@ Project Manager Kaleab, with Biniyam as frontend lead, Abel as support subject t
 
 ## Dependencies
 
-PD-001. Must be approved before assigning overlapping frontend tasks or shared files.
+PD-001. This decision is approved for the current EPIC-5 operational scope.
 
 ## Acceptance criteria
 
@@ -60,4 +80,6 @@ PD-001. Must be approved before assigning overlapping frontend tasks or shared f
 
 ## Developer/PM handoff instructions
 
-**DO NOT ASSIGN OVERLAPPING FRONTEND TASKS UNTIL APPROVED.** Developers must stop when their task would require modifying a component owned by another task.
+For the approved scope above, developers may perform the specified EPIC-5
+shared-shell integration. Any ownership change beyond that scope requires a
+new Project Manager decision.

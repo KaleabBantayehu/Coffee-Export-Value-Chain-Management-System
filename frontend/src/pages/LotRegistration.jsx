@@ -90,6 +90,9 @@ export default function LotRegistration() {
           <h2>Coffee Lot created</h2>
           <p>GIN: {createdLot.gin_code}</p>
           <p>Status: {createdLot.status}</p>
+          <button type="button" onClick={() => navigate(`/lots/${createdLot.lot_id}/trace`)}>
+            View traceability
+          </button>
           {canRegister && (
             <button type="button" onClick={() => navigate(`/lots/${createdLot.lot_id}/qr`)}>
               Generate QR
