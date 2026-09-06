@@ -13,7 +13,7 @@ This package records project-level decisions required before assigning the full 
 | PD-003 | `PD-003 final decision.md`         | GIN format                                                             | APPROVED       |
 | PD-004 | `04-qr-contract.md`                | QR payload, identifier, storage, signing, and public response contract | APPROVED       |
 | PD-005 | `05-frontend-ownership.md`         | Feature frontend versus EPIC-5 integration ownership                   | APPROVED       |
-| PD-006 | `06-qa-sequencing.md`              | EPIC-6 QA-005/QA-006 sequence                                          | UNRESOLVED     |
+| PD-006 | `06-qa-sequencing.md`              | EPIC-6 QA-005/QA-006 sequence                                          | APPROVED       |
 | PD-007 | `07-evidence-and-documentation.md` | Locations for QA/evidence/documentation artifacts                      | UNRESOLVED     |
 | PD-008 | `08-epic-readiness-gate.md`        | Gate for assigning an EPIC to implementation                           | UNRESOLVED     |
 | PD-009 | `09-epic3-epic-boundary.md`        | EPIC 3 Traceability versus EPIC 4 Dynamic QR backlog boundary          | RESOLVED       |
@@ -57,7 +57,9 @@ PD-001 should be approved first because it governs how all later conflicts are i
 - PD-004 blocks EPIC-4 QR implementation and EPIC-5 QR integration.
 - PD-005 is approved for EPIC-5 shared-shell integration; changes outside
   its recorded ownership scope still require Project Manager approval.
-- PD-006 blocks final QA ordering and can create a circular dependency.
+- PD-006 is approved: QA-005 performs backend/API/database integration first;
+  QA-006 then independently verifies the frontend/browser workflow. FE-010 is
+  supporting handoff evidence, not a hard QA-005 execution dependency.
 - PD-007 blocks consistent evidence/report storage, though QA planning can proceed.
 - PD-008 blocks formal declaration that downstream EPICs are ready for assignment.
 
