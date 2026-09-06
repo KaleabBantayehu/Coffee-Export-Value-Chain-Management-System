@@ -23,12 +23,30 @@ No individual development happens directly on `main` or `develop`.
 
 - Every feature branch is merged via a pull request into `develop`, never by
   direct push.
-- **At least one reviewer** (a team member other than the author) must
-  review and approve before merge. An AI agent's own review of its own work
-  does not satisfy this requirement — a human teammate must review.
+- **For multi-person development, at least one human reviewer** (a team
+  member other than the author) must review and approve before merge. An AI
+  agent's own review of its own work does not satisfy this requirement — a
+  human teammate must review.
 - The PR description states: which task file it implements (by Task ID),
   what was implemented, and what was explicitly left out (if anything),
   mirroring the task file's `Out of Scope` section.
+
+### Solo-developer review exception
+
+For a genuine single-developer project where no second human team member is
+available, the Project Manager/project owner may use the documented
+solo-developer self-review exception recorded in
+`PROJECT-DECISIONS/11-solo-developer-review-exception.md`. Before merge, the
+owner must review the exact diff, execute all task-required checks, record
+check results and unresolved risks/blockers, and explicitly approve the
+merge in the task's review record or PR.
+
+AI assistants and tools may support that review but do not count as an
+independent human reviewer. The exception applies only while the project
+remains single-developer and does not waive testing, evidence, security,
+change-control, branch-safety, pull-request, or protected-branch
+requirements. When another human contributor or reviewer is available, the
+standard independent-review requirement applies to future merges.
 
 ## Commit messages
 
@@ -61,7 +79,8 @@ Every feature, without exception, follows these steps in order:
 3. **Implement** — create a feature branch from `develop`.
 4. **Test** — happy path, invalid input, unauthorized access, wrong role,
    database behavior, API response (see `05-testing-rules.md`).
-5. **Review** — a teammate reviews before merge.
+5. **Review** — a teammate reviews before merge, unless the documented
+   solo-developer review exception applies.
 6. **Merge** — into `develop`, never directly into `main`.
 7. **Integration test** — confirm nothing existing broke.
 8. **Commit** — meaningful, conventional messages (see above).
