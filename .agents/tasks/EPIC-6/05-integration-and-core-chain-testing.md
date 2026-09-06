@@ -14,11 +14,18 @@ Implementing/fixing modules, direct insertion of acceptance records, schema/API 
 
 ## Preconditions
 
-QA-001 complete; EPIC-1 through EPIC-5 completion/verification gates are implemented and approved; backend/frontend/database run; synthetic users/data and approved QR contract exist. Missing upstream gate blocks the relevant chain segment.
+QA-001 complete; the relevant EPIC-1 through EPIC-4 backend/API verification
+gates are implemented and approved; backend/database run; synthetic users/data
+and approved QR contract exist. Under approved PD-006, EPIC-5 FE-010 is
+supporting frontend handoff evidence rather than a hard QA-005 execution gate;
+QA-006 independently verifies the frontend/browser workflow after QA-005.
+Missing upstream backend/API gate blocks the relevant chain segment.
 
 ## Dependencies
 
-EPIC-1-AUTH-008, EPIC-2-FARM-007, EPIC-3-TRACE-007, EPIC-4-QR-006, EPIC-5-FE-010; QA-002 through QA-004 results as applicable.
+EPIC-1-AUTH-008, EPIC-2-FARM-007, EPIC-3-TRACE-007, EPIC-4-QR-006,
+approved PD-006 sequencing, and QA-002 through QA-004 results as applicable.
+EPIC-5-FE-010 remains supporting handoff context, not a hard dependency.
 
 ## Inputs
 
@@ -38,7 +45,9 @@ Verify service-to-database/API joins and transaction integrity through public in
 
 ## Frontend Responsibilities
 
-Coordinate with QA-006 for browser-created records; confirm actual UI calls the documented APIs.
+QA-005 does not execute frontend/browser verification. Coordinate the
+API-to-UI contract handoff with QA-006, which independently verifies browser
+behavior in the next approved QA step.
 
 ## Database Responsibilities
 
@@ -50,7 +59,9 @@ Use only upstream documented endpoints and approved QR contract. Do not invent a
 
 ## UI / UX Requirements
 
-The complete workflow must be executable through the connected web application, with controlled transitions and errors.
+QA-006 owns connected-web-application transitions and error-state verification.
+QA-005 verifies the same core chain through approved backend/API and read-only
+database interfaces without claiming browser execution.
 
 ## Security Requirements
 
@@ -62,7 +73,8 @@ Include invalid Farm/Lot/event/QR cases at integration boundaries and verify rol
 
 ## Acceptance Criteria
 
-- A complete core chain is created and exercised through the approved UI/API path.
+- A complete core chain is created and exercised through the approved API path;
+  QA-006 independently verifies the connected UI path.
 - Database evidence confirms correct persisted relationships and no orphaned records.
 - Each handoff uses the actual upstream contract.
 - Failure of any core link is reported as BLOCKED with an owning task and reproduction detail.
@@ -70,7 +82,9 @@ Include invalid Farm/Lot/event/QR cases at integration boundaries and verify rol
 
 ## Testing Requirements
 
-Run integrated Postman/API workflow, relevant automated suites, read-only database verification, and coordinate the manual browser chain with QA-006. Rerun after fixes via QA-007.
+Run integrated Postman/API workflow, relevant automated suites, and read-only
+database verification. QA-006 performs the subsequent manual browser chain.
+Rerun after fixes via QA-007.
 
 ## Evidence Requirements
 

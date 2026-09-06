@@ -18,7 +18,11 @@ QA-001 complete; EPIC-5-FE-010 and EPIC-1-4 verification handoffs are implemente
 
 ## Dependencies
 
-EPIC-5 FE-001 through FE-010; EPIC-1 auth; EPIC-2 farmer/farm; EPIC-3 lot/trace; EPIC-4 QR; QA-003/004 for API/security outcomes.
+EPIC-5 FE-001 through FE-010; EPIC-1 auth; EPIC-2 farmer/farm; EPIC-3 lot/trace;
+EPIC-4 QR; QA-003/004 for API/security outcomes; and approved PD-006 sequencing.
+QA-005's backend/API/database evidence precedes this independent frontend
+verification; FE-010 remains supporting handoff evidence rather than a
+substitute for QA-006.
 
 ## Inputs
 

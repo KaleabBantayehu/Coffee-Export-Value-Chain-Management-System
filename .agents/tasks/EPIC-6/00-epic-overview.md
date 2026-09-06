@@ -80,6 +80,12 @@ EPIC-1..EPIC-5 task packages and implementation state inspection
 
 QA-001 can prepare the plan, matrix, environment checklist, and fixtures before all upstream implementation is complete. QA-002, QA-003, and QA-004 may prepare test cases in parallel after QA-001; execution of each area is conditional on the corresponding upstream implementation. QA-005 requires the implemented backend chain and stable database. QA-006 requires EPIC-5 screens and upstream APIs. QA-007 and QA-008 can begin evidence/log structure in parallel with execution but require results to close. QA-009 consumes QA-007/008 outputs. QA-010 is strictly last.
 
+**PD-006 approved sequence:** QA-005 first verifies the backend/API/database
+core chain without treating FE-010 as a hard execution dependency; QA-006 then
+independently verifies the frontend/browser workflow. QA-007 through QA-010
+follow in the dependency order shown above. This sequencing decision does not
+mark any task started or complete.
+
 ## Recommended execution order
 
 1. QA-001 establishes scope, environment, fixture policy, and readiness statuses.
