@@ -2,7 +2,7 @@
 
 ## Status
 
-**COMPLETED — pending PM solo-review/integration under PD-011.**
+**COMPLETED — APPROVED FOR INTEGRATION under PD-011.**
 
 ## Scope and environment
 
@@ -95,4 +95,38 @@ The only environment observation is the pre-existing dotenv parser warning noted
 - Only this evidence file and its sanitized QA-004 collection are QA-004 deliverables.
 - `.agents/execution/IMPLEMENT-TASK-PROMPT.md` is a protected pre-existing local modification and must remain unstaged/uncommitted.
 - No QA-005, QA-006, EPIC-7, or EPIC-8 work was started.
-- This evidence awaits the project owner's documented PD-011 solo-review/integration step.
+- The Project Manager/project owner approved this evidence for integration
+  under the documented PD-011 solo-review exception.
+
+## PD-011 solo-review record
+
+- **Task/branch:** EPIC-6-QA-004 / `feature/epic-6-qa-004-auth-rbac-security`.
+- **Author/reviewer:** Kaleab Bantayehu, Project Manager/project owner.
+- **Reason the exception applies:** this is a genuine single-developer project
+  with no second human team member available; PD-011 governs the documented
+  owner self-review process.
+- **Exact diff and task contract reviewed:** QA-004 commit
+  `1cf7e9e9f6c0061cdcf63b04dda453af5bc7881c` contains only this evidence
+  record and `docs/testing/postman/EPIC-6-QA-004.postman_collection.json`.
+  The EPIC-6-QA-004 task contract was reviewed against the complete delta; no
+  application source, local credential file, or unrelated QA task is changed.
+- **Checks reviewed:** local QA target confirmation; independent four-role API
+  execution; 401 missing/invalid/expired-token behavior; 403 insufficient-role
+  behavior; generic login failure; privileged Farmer/Farm/Lot/QR boundaries;
+  server-controlled identity fields; public QR minimization and tamper
+  rejection; supported expired-token generation; Newman 34 requests/34
+  assertions/0 failures; collection JSON validation; empty sensitive runtime
+  variables; and feature-delta `git diff --check`.
+- **Fixture classification:** **APPROVED LOCAL QA FIXTURE PREPARATION**. The
+  localhost-only synthetic `qa.*` accounts used existing User/Role models and
+  password hashing, introduced no bootstrap/backdoor endpoint, changed no real
+  account, and are not a product change.
+- **Security/sanitization review:** PASS. No plaintext password, bearer/JWT,
+  signing key, HMAC key, QR signature, local environment file, real Farmer
+  PII, or application source is included in the reviewed delta.
+- **Unresolved risks/blockers:** none. The pre-existing dotenv parser warning
+  remains a non-blocking local environment observation. PD-006 and PD-007
+  remain deferred governance items for later QA tasks.
+- **Approval state:** **APPROVED FOR INTEGRATION** by the Project
+  Manager/project owner under PD-011 on 2026-09-06. No AI assistant or tool is
+  represented as an independent human reviewer.
