@@ -75,3 +75,26 @@ retroactively claim QA-001 complied with the former rule.
 - **Status:** APPROVED.
 - **Recorded approval:** The Project Manager instruction establishing this
   decision and authorizing the narrowly scoped Rule 04 amendment.
+
+## Solo-review record — PD-011 integration
+
+- **Branch/task:** `feature/pd-011-solo-review-exception` / PD-011.
+- **Author and reviewer:** Kaleab Bantayehu, Project Manager/project owner.
+- **Why the exception applies:** The project has one human developer and no
+  second human team member available for an independent review.
+- **Exact files reviewed:** `.agents/rules/04-git-workflow.md`,
+  `.agents/tasks/PROJECT-DECISIONS/00-project-decision-overview.md`, and this
+  decision record.
+- **Diff and checks:** `git diff --check origin/develop...HEAD` and
+  `git show --check 63ee0f8fcbb42edc9599b3acc8bc84d6f96911f5` passed; the
+  reviewed delta contains only the three governance files listed above.
+- **Review findings:** The multi-person independent-review requirement remains
+  explicit; the exception requires exact-diff review, task-required checks,
+  risk/blocker recording, and owner approval; AI is not a human reviewer; and
+  testing, evidence, security, change-control, pull-request, and branch-safety
+  requirements remain mandatory.
+- **Unresolved risks/blockers:** None for PD-011 integration. PD-006 and
+  PD-007 remain unrelated deferred governance items for later EPIC-6 tasks.
+- **Explicit approval:** Project Manager approval recorded for this integration
+  under the approved solo-developer procedure. No second human reviewer is
+  claimed.
