@@ -1,0 +1,207 @@
+{
+  "info": {
+    "name": "CEVCMS EPIC-6 QA-003 API and Input Validation",
+    "description": "Sanitized QA-003 API matrix. Use only an uncommitted local environment with synthetic management credentials. No token, password, key, or PII is stored here.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "baseUrl", "value": "http://127.0.0.1:8000"},
+    {"key": "managementUsername", "value": ""},
+    {"key": "managementPassword", "value": ""},
+    {"key": "managementToken", "value": ""},
+    {"key": "runId", "value": ""},
+    {"key": "nationalId", "value": ""},
+    {"key": "farmerId", "value": ""},
+    {"key": "farmId", "value": ""},
+    {"key": "lotId", "value": ""},
+    {"key": "qrId", "value": ""},
+    {"key": "qrSignature", "value": ""}
+  ],
+  "item": [
+    {
+      "name": "Authentication and protected boundary",
+      "item": [
+        {
+          "name": "Valid login",
+          "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"username\": \"{{managementUsername}}\",\n  \"password\": \"{{managementPassword}}\"\n}"}, "url": "{{baseUrl}}/api/v1/auth/login"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns 200', () => pm.response.to.have.status(200));", "const body = pm.response.json();", "pm.expect(body.access_token).to.be.a('string').and.not.empty;", "pm.expect(body.role).to.be.a('string').and.not.empty;", "pm.collectionVariables.set('managementToken', body.access_token);", "const runId = Date.now().toString();", "pm.collectionVariables.set('runId', runId);", "pm.collectionVariables.set('nationalId', `QA003-${runId}`);"]}}]
+        },
+        {
+          "name": "Invalid credentials",
+          "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"username\":\"missing-qa003-user\",\"password\":\"invalid-synthetic-password\"}"}, "url": "{{baseUrl}}/api/v1/auth/login"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns 401', () => pm.response.to.have.status(401));", "pm.expect(pm.response.json().detail).to.be.a('string').and.not.empty;"]}}]
+        },
+        {
+          "name": "Missing login field",
+          "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"username\":\"missing-password\"}"}, "url": "{{baseUrl}}/api/v1/auth/login"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns bounded 400', () => pm.response.to.have.status(400));", "pm.expect(pm.response.json().detail).to.exist;"]}}]
+        },
+        {
+          "name": "Malformed login JSON",
+          "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{invalid-json"}, "url": "{{baseUrl}}/api/v1/auth/login"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns bounded 400', () => pm.response.to.have.status(400));", "pm.expect(pm.response.json().detail).to.exist;"]}}]
+        },
+        {
+          "name": "Unauthenticated protected list",
+          "request": {"method": "GET", "url": "{{baseUrl}}/api/v1/farms"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns 401', () => pm.response.to.have.status(401));", "pm.expect(pm.response.json().detail).to.be.a('string').and.not.empty;"]}}]
+        }
+      ]
+    },
+    {
+      "name": "Farmer API and validation",
+      "item": [
+        {
+          "name": "Create synthetic Farmer",
+          "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{managementToken}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"full_name\":\"QA003 Synthetic Farmer\",\"national_id\":\"{{nationalId}}\",\"gender\":\"Unspecified\",\"phone_number\":\"+251900000000\"}"}, "url": "{{baseUrl}}/api/v1/farmers"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns 201', () => pm.response.to.have.status(201));", "const body = pm.response.json();", "pm.expect(body.farmer_id).to.be.a('number');", "pm.expect(body.fin_code).to.be.a('string').and.not.empty;", "pm.collectionVariables.set('farmerId', body.farmer_id);"]}}]
+        },
+        {
+          "name": "Duplicate Farmer constraint",
+          "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{managementToken}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"full_name\":\"QA003 Duplicate\",\"national_id\":\"{{nationalId}}\",\"gender\":\"Unspecified\",\"phone_number\":\"+251900000000\"}"}, "url": "{{baseUrl}}/api/v1/farmers"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns 409', () => pm.response.to.have.status(409));", "pm.expect(pm.response.json().detail).to.be.a('string').and.not.empty;"]}}]
+        },
+        {
+          "name": "Missing Farmer field",
+          "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{managementToken}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"full_name\":\"QA003 Missing\"}"}, "url": "{{baseUrl}}/api/v1/farmers"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns bounded 400', () => pm.response.to.have.status(400));", "pm.expect(pm.response.json().detail).to.exist;"]}}]
+        },
+        {
+          "name": "Read and update Farmer",
+          "request": {"method": "PUT", "header": [{"key": "Authorization", "value": "Bearer {{managementToken}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"full_name\":\"QA003 Synthetic Farmer Updated\",\"national_id\":\"{{nationalId}}\",\"gender\":\"Unspecified\",\"phone_number\":\"+251900000000\"}"}, "url": "{{baseUrl}}/api/v1/farmers/{{farmerId}}"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns 200', () => pm.response.to.have.status(200));", "pm.expect(pm.response.json().farmer_id).to.eql(Number(pm.collectionVariables.get('farmerId')));"]}}]
+        },
+        {
+          "name": "Search Farmer",
+          "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{managementToken}}"}], "url": "{{baseUrl}}/api/v1/farmers?search={{nationalId}}"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns 200', () => pm.response.to.have.status(200));", "pm.expect(pm.response.json()).to.be.an('array');"]}}]
+        }
+      ]
+    },
+    {
+      "name": "Farm and polygon API validation",
+      "item": [
+        {
+          "name": "Create valid polygon Farm",
+          "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{managementToken}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"farmer_id\":{{farmerId}},\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[38.75,9.0],[38.76,9.0],[38.77,9.01],[38.76,9.02],[38.75,9.02],[38.74,9.01],[38.75,9.0]]]}}"}, "url": "{{baseUrl}}/api/v1/farms"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns 201', () => pm.response.to.have.status(201));", "const body = pm.response.json();", "pm.expect(body.farm_id).to.be.a('number');", "pm.expect(body.geometry.type).to.eql('Polygon');", "pm.collectionVariables.set('farmId', body.farm_id);"]}}]
+        },
+        {
+          "name": "Create point plus radius Farm",
+          "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{managementToken}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"farmer_id\":{{farmerId}},\"geometry\":{\"type\":\"Point\",\"coordinates\":[38.75,9.0]},\"radius_meters\":100}"}, "url": "{{baseUrl}}/api/v1/farms"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns 201', () => pm.response.to.have.status(201));", "pm.expect(pm.response.json().geometry.type).to.eql('Polygon');"]}}]
+        },
+        {
+          "name": "Malformed Farm geometry",
+          "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{managementToken}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"farmer_id\":{{farmerId}},\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[]}}"}, "url": "{{baseUrl}}/api/v1/farms"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns 400', () => pm.response.to.have.status(400));", "pm.expect(pm.response.json().detail).to.be.a('string').and.not.empty;"]}}]
+        },
+        {
+          "name": "Nonexistent Farm Farmer",
+          "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{managementToken}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"farmer_id\":999999999,\"geometry\":{\"type\":\"Point\",\"coordinates\":[38.75,9.0]},\"radius_meters\":100}"}, "url": "{{baseUrl}}/api/v1/farms"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns 404', () => pm.response.to.have.status(404));", "pm.expect(pm.response.json().detail).to.be.a('string').and.not.empty;"]}}]
+        },
+        {
+          "name": "Invalid Farm radius type",
+          "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{managementToken}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"farmer_id\":{{farmerId}},\"geometry\":{\"type\":\"Point\",\"coordinates\":[38.75,9.0]},\"radius_meters\":\"invalid\"}"}, "url": "{{baseUrl}}/api/v1/farms"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns bounded 400', () => pm.response.to.have.status(400));", "pm.expect(pm.response.json().detail).to.exist;"]}}]
+        },
+        {
+          "name": "Validate Farm",
+          "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{managementToken}}"}], "url": "{{baseUrl}}/api/v1/farms/{{farmId}}/validate"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns 200', () => pm.response.to.have.status(200));", "pm.expect(pm.response.json().farm_id).to.eql(Number(pm.collectionVariables.get('farmId')));"]}}]
+        }
+      ]
+    },
+    {
+      "name": "Lot, event, and trace API validation",
+      "item": [
+        {
+          "name": "Create Coffee Lot",
+          "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{managementToken}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"farm_id\":{{farmId}}}"}, "url": "{{baseUrl}}/api/v1/lots"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns 201', () => pm.response.to.have.status(201));", "const body = pm.response.json();", "pm.expect(body.gin_code).to.be.a('string').and.not.empty;", "pm.expect(body.status).to.eql('created');", "pm.collectionVariables.set('lotId', body.lot_id);"]}}]
+        },
+        {
+          "name": "Missing Lot farm ID",
+          "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{managementToken}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{}"}, "url": "{{baseUrl}}/api/v1/lots"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns bounded 400', () => pm.response.to.have.status(400));", "pm.expect(pm.response.json().detail).to.exist;"]}}]
+        },
+        {
+          "name": "Nonexistent Lot Farm",
+          "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{managementToken}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"farm_id\":999999999}"}, "url": "{{baseUrl}}/api/v1/lots"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns 404', () => pm.response.to.have.status(404));", "pm.expect(pm.response.json().detail).to.be.a('string').and.not.empty;"]}}]
+        },
+        {
+          "name": "Append traceability event",
+          "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{managementToken}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"event_type\":\"qa003_validated\",\"notes\":\"Synthetic QA-003 event\"}"}, "url": "{{baseUrl}}/api/v1/lots/{{lotId}}/events"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns 201', () => pm.response.to.have.status(201));", "pm.expect(pm.response.json().event_type).to.eql('qa003_validated');"]}}]
+        },
+        {
+          "name": "Missing event type",
+          "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{managementToken}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{}"}, "url": "{{baseUrl}}/api/v1/lots/{{lotId}}/events"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns bounded 400', () => pm.response.to.have.status(400));", "pm.expect(pm.response.json().detail).to.exist;"]}}]
+        },
+        {
+          "name": "Nonexistent Lot event",
+          "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{managementToken}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"event_type\":\"qa003_missing_lot\"}"}, "url": "{{baseUrl}}/api/v1/lots/999999999/events"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns 404', () => pm.response.to.have.status(404));", "pm.expect(pm.response.json().detail).to.be.a('string').and.not.empty;"]}}]
+        },
+        {
+          "name": "Read Lot trace",
+          "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{managementToken}}"}], "url": "{{baseUrl}}/api/v1/lots/{{lotId}}/trace"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns 200', () => pm.response.to.have.status(200));", "const body = pm.response.json();", "pm.expect(body).to.have.keys('lot', 'farm', 'farmer', 'events');", "pm.expect(body.events).to.be.an('array').and.not.empty;"]}}]
+        },
+        {
+          "name": "Nonexistent Lot trace",
+          "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{managementToken}}"}], "url": "{{baseUrl}}/api/v1/lots/999999999/trace"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns 404', () => pm.response.to.have.status(404));", "pm.expect(pm.response.json().detail).to.be.a('string').and.not.empty;"]}}]
+        }
+      ]
+    },
+    {
+      "name": "QR generation and public verification",
+      "item": [
+        {
+          "name": "Generate QR",
+          "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{managementToken}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{}"}, "url": "{{baseUrl}}/api/v1/lots/{{lotId}}/qr"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns 201', () => pm.response.to.have.status(201));", "const body = pm.response.json();", "pm.expect(body).to.have.keys('qr_id', 'verification_url', 'image_svg', 'image_png_data_url');", "pm.expect(body.image_png_data_url).to.match(/^data:image\\/png;base64,/);", "pm.expect(JSON.stringify(body)).not.to.include('payload_hash');", "pm.expect(JSON.stringify(body)).not.to.include('hmac_signature');", "const match = body.verification_url.match(/[?&]sig=([^&]+)/);", "pm.expect(match).to.not.equal(null);", "pm.collectionVariables.set('qrId', body.qr_id);", "pm.collectionVariables.set('qrSignature', match[1]);"]}}]
+        },
+        {
+          "name": "Reuse active QR",
+          "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{managementToken}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"regenerate\":false}"}, "url": "{{baseUrl}}/api/v1/lots/{{lotId}}/qr"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns 200', () => pm.response.to.have.status(200));", "pm.expect(pm.response.json().qr_id).to.eql(Number(pm.collectionVariables.get('qrId')));"]}}]
+        },
+        {
+          "name": "Malformed QR regeneration value",
+          "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{managementToken}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"regenerate\":\"not-a-boolean\"}"}, "url": "{{baseUrl}}/api/v1/lots/{{lotId}}/qr"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns bounded 400', () => pm.response.to.have.status(400));", "pm.expect(pm.response.json().detail).to.exist;"]}}]
+        },
+        {
+          "name": "Nonexistent QR Lot",
+          "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{managementToken}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{}"}, "url": "{{baseUrl}}/api/v1/lots/999999999/qr"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns 404', () => pm.response.to.have.status(404));", "pm.expect(pm.response.json().detail).to.be.a('string').and.not.empty;"]}}]
+        },
+        {
+          "name": "Verify valid QR publicly",
+          "request": {"method": "GET", "url": "{{baseUrl}}/api/v1/verify/{{qrId}}?sig={{qrSignature}}"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns 200', () => pm.response.to.have.status(200));", "const body = pm.response.json();", "pm.expect(body).to.have.keys('status', 'gin_code', 'origin_region', 'grade');", "pm.expect(body.status).to.eql('valid');", "pm.expect(JSON.stringify(body)).not.to.include('national_id');", "pm.expect(JSON.stringify(body)).not.to.include('phone_number');", "pm.expect(JSON.stringify(body)).not.to.include('hmac_signature');"]}}]
+        },
+        {
+          "name": "Reject tampered QR signature",
+          "request": {"method": "GET", "url": "{{baseUrl}}/api/v1/verify/{{qrId}}?sig={{qrSignature}}tampered"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns 400', () => pm.response.to.have.status(400));", "pm.expect(pm.response.json().detail).to.be.a('string').and.not.empty;"]}}]
+        },
+        {
+          "name": "Missing QR signature",
+          "request": {"method": "GET", "url": "{{baseUrl}}/api/v1/verify/{{qrId}}"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns bounded 400', () => pm.response.to.have.status(400));", "pm.expect(pm.response.json().detail).to.exist;"]}}]
+        },
+        {
+          "name": "Unknown QR",
+          "request": {"method": "GET", "url": "{{baseUrl}}/api/v1/verify/999999999?sig={{qrSignature}}"},
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('returns 404', () => pm.response.to.have.status(404));", "pm.expect(pm.response.json().detail).to.be.a('string').and.not.empty;"]}}]
+        }
+      ]
+    }
+  ]
+}
